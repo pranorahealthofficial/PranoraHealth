@@ -1,6 +1,6 @@
 // ══ SUPABASE CONFIG ══
 const SUPABASE_URL = 'https://atdhhsqommyfdoajrcwu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0-PwYxjTiT-LJDCZOgyNTQ_Dl1FhlE9';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function signUp(email, password, name) {
@@ -180,5 +180,5 @@ function defaultPosts() {
     { id:'b2', title:'Natural Skin Care with Ayurvedic Herbs', title_hindi:'आयुर्वेदिक त्वचा देखभाल', category:'Skin Care', excerpt:'Transform your skin naturally with these powerful Ayurvedic ingredients used for centuries in India.', image:'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80', created_at: new Date().toISOString(), views: 980 },
     { id:'b3', title:'Ayurvedic Morning Routine for Better Health', title_hindi:'आयुर्वेदिक सुबह की दिनचर्या', category:'Wellness', excerpt:'Start your day right with these simple Ayurvedic morning practices for energy and health every day.', image:'https://images.unsplash.com/photo-1465844032861-6f939abe6957?w=600&q=80', created_at: new Date().toISOString(), views: 820 },
   ];
-                                                                                                                                                                  }
-         
+    }
+  
