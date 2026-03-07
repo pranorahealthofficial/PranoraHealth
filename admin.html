@@ -4,43 +4,63 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin — PranoraHealth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700&family=Yatra+One&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
+
+  <!-- Load Supabase FIRST before anything else -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    // Initialize immediately
+    const _db = supabase.createClient(
+      'https://atdhhsqommyfdoajrcwu.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA'
+    );
+    console.log('Supabase loaded:', !!_db);
+  </script>
 </head>
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--green);padding:2rem;">
-  <div style="background:white;border-radius:18px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:4px solid var(--gold);text-align:center;">
-    <img src="1760520800681.png" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);margin-bottom:1rem;"/>
-    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--green);font-size:1.5rem;margin-bottom:.3rem;">Admin Login</h2>
-    <p style="font-size:.8rem;color:#888;margin-bottom:1.5rem;">PranoraHealth Admin Panel</p>
-    <div id="loginErrMsg" style="background:#ffeaea;border:1px solid #ffb3b3;border-radius:8px;padding:.6rem;font-size:.82rem;color:#c0392b;margin-bottom:1rem;display:none;"></div>
-    <div class="form-group" style="text-align:left;">
-      <label>Email</label>
-      <input type="email" id="aEmail" placeholder="admin@email.com" style="width:100%;"/>
+<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1B4D2E;padding:1rem;">
+  <div style="background:white;border-radius:16px;padding:2rem;width:100%;max-width:360px;border-top:4px solid #C9A84C;text-align:center;">
+    <img src="1760520800681.png" style="width:75px;height:75px;border-radius:50%;border:3px solid #C9A84C;margin-bottom:.8rem;" onerror="this.style.display='none'"/>
+    <h2 style="font-family:'Cormorant Garamond',serif;color:#1B4D2E;font-size:1.6rem;margin-bottom:.2rem;">Admin Login</h2>
+    <p style="font-size:.78rem;color:#888;margin-bottom:1.4rem;">PranoraHealth Admin Panel</p>
+    
+    <div id="errBox" style="background:#ffeaea;border:1px solid #ffb3b3;border-radius:7px;padding:.6rem;font-size:.82rem;color:#c0392b;margin-bottom:1rem;display:none;"></div>
+    <div id="loadBox" style="background:#eaffea;border:1px solid #b3ffb3;border-radius:7px;padding:.6rem;font-size:.82rem;color:#27ae60;margin-bottom:1rem;display:none;">⏳ Login ho raha hai...</div>
+    
+    <div style="text-align:left;margin-bottom:.9rem;">
+      <label style="font-size:.82rem;font-weight:700;color:#2D5040;display:block;margin-bottom:.3rem;">Email</label>
+      <input type="email" id="aEmail" value="pranorahealthofficial@gmail.com" 
+        style="width:100%;padding:.65rem .9rem;border:2px solid #F0E8D0;border-radius:8px;font-size:.9rem;font-family:'DM Sans',sans-serif;box-sizing:border-box;"/>
     </div>
-    <div class="form-group" style="text-align:left;">
-      <label>Password</label>
-      <input type="password" id="aPass" placeholder="Password" onkeypress="if(event.key==='Enter')adminLogin()" style="width:100%;"/>
+    <div style="text-align:left;margin-bottom:1.2rem;">
+      <label style="font-size:.82rem;font-weight:700;color:#2D5040;display:block;margin-bottom:.3rem;">Password</label>
+      <input type="password" id="aPass" placeholder="Pranora2025"
+        style="width:100%;padding:.65rem .9rem;border:2px solid #F0E8D0;border-radius:8px;font-size:.9rem;font-family:'DM Sans',sans-serif;box-sizing:border-box;"/>
     </div>
-    <button onclick="adminLogin()" class="btn-gold" style="width:100%;font-size:1rem;padding:.85rem;">Login to Admin →</button>
+    
+    <button id="loginBtn"
+      style="width:100%;background:linear-gradient(135deg,#C9A84C,#E2C47A);color:#1B4D2E;border:none;padding:.9rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;"
+      onclick="doLogin()">
+      Login to Admin →
+    </button>
+    
+    <p style="font-size:.72rem;color:#aaa;margin-top:1rem;">Password: Pranora2025</p>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-  <nav style="position:sticky;top:0;z-index:200;background:var(--green);border-bottom:2px solid var(--gold);padding:.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between;">
-    <a href="index.html" style="display:flex;align-items:center;gap:.7rem;text-decoration:none;">
-      <img src="1760520800681.png" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);"/>
-      <div>
-        <div style="font-family:'Cormorant Garamond',serif;color:var(--cream);font-size:1rem;font-weight:700;">Pranora<span style="color:var(--gold);">Health</span></div>
-        <div style="font-size:.65rem;color:var(--gold-light);">Admin Panel</div>
-      </div>
-    </a>
-    <div style="display:flex;gap:.6rem;">
-      <a href="index.html" style="color:var(--gold);text-decoration:none;font-size:.8rem;font-weight:700;padding:.35rem .8rem;border:1px solid rgba(201,168,76,.3);border-radius:6px;">🌿 Site</a>
-      <button onclick="adminLogout()" style="background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.3);border-radius:6px;padding:.35rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Logout</button>
+<!-- ADMIN PANEL (hidden initially) -->
+<div id="adminWrap" style="display:none;">
+  <nav style="position:sticky;top:0;z-index:200;background:#1B4D2E;border-bottom:2px solid #C9A84C;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      <img src="1760520800681.png" style="width:36px;height:36px;border-radius:50%;border:2px solid #C9A84C;" onerror="this.style.display='none'"/>
+      <span style="font-family:'Cormorant Garamond',serif;color:#FDF8F0;font-size:1rem;font-weight:700;">Pranora<span style="color:#C9A84C;">Health</span> <span style="font-size:.7rem;color:#C9A84C;font-family:'DM Sans',sans-serif;">Admin</span></span>
+    </div>
+    <div style="display:flex;gap:.5rem;">
+      <a href="index.html" style="color:#C9A84C;text-decoration:none;font-size:.78rem;font-weight:700;padding:.3rem .7rem;border:1px solid rgba(201,168,76,.3);border-radius:5px;">🌿 Site</a>
+      <button onclick="doLogout()" style="background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.3);border-radius:5px;padding:.3rem .7rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Logout</button>
     </div>
   </nav>
 
@@ -59,134 +79,131 @@
 
     <main class="admin-main">
 
-      <!-- DASHBOARD -->
       <div class="admin-panel active" id="panel-dashboard">
         <div class="page-title">📊 Dashboard</div>
-        <div class="stats-grid" id="statsGrid">
-          <div class="stat-card"><div class="snum" id="s-products">...</div><div class="slbl">Products</div></div>
-          <div class="stat-card"><div class="snum" id="s-posts">...</div><div class="slbl">Blog Posts</div></div>
-          <div class="stat-card"><div class="snum" id="s-orders">...</div><div class="slbl">Orders</div></div>
-          <div class="stat-card"><div class="snum" id="s-users">...</div><div class="slbl">Users</div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="snum" id="s1">-</div><div class="slbl">Products</div></div>
+          <div class="stat-card"><div class="snum" id="s2">-</div><div class="slbl">Posts</div></div>
+          <div class="stat-card"><div class="snum" id="s3">-</div><div class="slbl">Orders</div></div>
+          <div class="stat-card"><div class="snum" id="s4">-</div><div class="slbl">Users</div></div>
         </div>
         <div class="table-wrap">
           <div class="table-header"><h3>Recent Orders</h3></div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-          <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody></table></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="recentOrders"><tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody></table></div>
         </div>
       </div>
 
-      <!-- PRODUCTS LIST -->
       <div class="admin-panel" id="panel-products">
         <div class="page-title">🛒 Products</div>
         <div class="table-wrap">
-          <div class="table-header"><h3>All Products</h3><button class="btn-gold" onclick="showPanel('addProduct',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button></div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+          <div class="table-header"><h3>All Products</h3>
+            <button class="btn-gold" onclick="showPanel('addProduct',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
           <tbody id="prodBody"></tbody></table></div>
         </div>
       </div>
 
-      <!-- ADD PRODUCT -->
       <div class="admin-panel" id="panel-addProduct">
-        <div class="page-title" id="prodFormTitle">➕ Add Product</div>
+        <div class="page-title" id="prodTitle">➕ Add Product</div>
         <div class="form-card">
           <input type="hidden" id="prodId"/>
           <div class="form-2col">
-            <div class="form-group"><label>Name (English)*</label><input type="text" id="prodName" placeholder="Ashwagandha Gold"/></div>
-            <div class="form-group"><label>Name (Hindi)</label><input type="text" id="prodNameHi" placeholder="अश्वगंधा गोल्ड"/></div>
+            <div class="form-group"><label>Name (English)*</label><input type="text" id="pName" placeholder="Ashwagandha Gold"/></div>
+            <div class="form-group"><label>Name (Hindi)</label><input type="text" id="pNameHi" placeholder="अश्वगंधा गोल्ड"/></div>
           </div>
           <div class="form-2col">
             <div class="form-group"><label>Category*</label>
-              <select id="prodCat"><option>Herbs</option><option>Cosmetics</option><option>Supplements</option><option>Skin Care</option><option>Hair Care</option><option>Herbal Tea</option><option>Wellness</option><option>Women Care</option></select>
+              <select id="pCat"><option>Herbs</option><option>Cosmetics</option><option>Supplements</option><option>Skin Care</option><option>Hair Care</option><option>Herbal Tea</option><option>Wellness</option><option>Women Care</option></select>
             </div>
             <div class="form-group"><label>Badge</label>
-              <select id="prodBadge"><option value="">None</option><option>BESTSELLER</option><option>NEW</option><option>SALE</option><option>HOT</option></select>
+              <select id="pBadge"><option value="">None</option><option>BESTSELLER</option><option>NEW</option><option>SALE</option><option>HOT</option></select>
             </div>
           </div>
           <div class="form-2col">
-            <div class="form-group"><label>Price (₹)*</label><input type="number" id="prodPrice" placeholder="499"/></div>
-            <div class="form-group"><label>Original Price (₹)</label><input type="number" id="prodOrigPrice" placeholder="799"/></div>
+            <div class="form-group"><label>Price (₹)*</label><input type="number" id="pPrice" placeholder="499"/></div>
+            <div class="form-group"><label>Original Price</label><input type="number" id="pOrig" placeholder="799"/></div>
           </div>
           <div class="form-2col">
-            <div class="form-group"><label>Stock</label><input type="number" id="prodStock" placeholder="100"/></div>
-            <div class="form-group"><label>Featured?</label><select id="prodFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
+            <div class="form-group"><label>Stock</label><input type="number" id="pStock" placeholder="100"/></div>
+            <div class="form-group"><label>Featured?</label><select id="pFeat"><option value="false">No</option><option value="true">Yes</option></select></div>
           </div>
-          <div class="form-group"><label>Image URL</label><input type="url" id="prodImg" placeholder="https://..." oninput="prev('imgPrev',this.value)"/></div>
-          <div id="imgPrev" style="margin-bottom:1rem;"></div>
-          <div class="form-group"><label>Description*</label><textarea id="prodDesc" placeholder="Product description..."></textarea></div>
-          <div style="display:flex;gap:1rem;">
-            <button class="btn-gold" onclick="saveProd()">💾 Save</button>
+          <div class="form-group"><label>Image URL</label><input type="url" id="pImg" placeholder="https://..." oninput="showPrev('pPrev',this.value)"/></div>
+          <div id="pPrev" style="margin-bottom:1rem;"></div>
+          <div class="form-group"><label>Description*</label><textarea id="pDesc" placeholder="Product description..."></textarea></div>
+          <div style="display:flex;gap:.8rem;">
+            <button class="btn-gold" onclick="saveProd()">💾 Save Product</button>
             <button class="btn-green" onclick="showPanel('products',null)">Cancel</button>
           </div>
-          <div id="prodMsg" style="margin-top:.7rem;font-size:.85rem;"></div>
+          <p id="pMsg" style="margin-top:.7rem;font-size:.85rem;font-weight:700;"></p>
         </div>
       </div>
 
-      <!-- BLOG POSTS -->
       <div class="admin-panel" id="panel-posts">
         <div class="page-title">📝 Blog Posts</div>
         <div class="table-wrap">
-          <div class="table-header"><h3>All Posts</h3><button class="btn-gold" onclick="showPanel('addPost',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button></div>
+          <div class="table-header"><h3>All Posts</h3>
+            <button class="btn-gold" onclick="showPanel('addPost',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button>
+          </div>
           <div style="overflow-x:auto;"><table><thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody id="postsBody"></tbody></table></div>
         </div>
       </div>
 
-      <!-- ADD POST -->
       <div class="admin-panel" id="panel-addPost">
-        <div class="page-title" id="postFormTitle">✏️ Add Post</div>
+        <div class="page-title" id="postTitle">✏️ Add Post</div>
         <div class="form-card">
           <input type="hidden" id="postId"/>
           <div class="form-2col">
-            <div class="form-group"><label>Title (English)*</label><input type="text" id="postTitle" placeholder="Post title..."/></div>
-            <div class="form-group"><label>Title (Hindi)</label><input type="text" id="postTitleHi" placeholder="शीर्षक..."/></div>
+            <div class="form-group"><label>Title (English)*</label><input type="text" id="ptTitle" placeholder="Post title..."/></div>
+            <div class="form-group"><label>Title (Hindi)</label><input type="text" id="ptTitleHi" placeholder="शीर्षक..."/></div>
           </div>
           <div class="form-2col">
             <div class="form-group"><label>Category*</label>
-              <select id="postCat"><option>Herbs</option><option>Skin Care</option><option>Hair Care</option><option>Wellness</option><option>Remedies</option><option>Supplements</option><option>Women Care</option></select>
+              <select id="ptCat"><option>Herbs</option><option>Skin Care</option><option>Hair Care</option><option>Wellness</option><option>Remedies</option><option>Supplements</option><option>Women Care</option></select>
             </div>
-            <div class="form-group"><label>Author</label><input type="text" id="postAuthor" placeholder="Dr. Name"/></div>
+            <div class="form-group"><label>Author</label><input type="text" id="ptAuthor" placeholder="Dr. Name"/></div>
           </div>
-          <div class="form-group"><label>Image URL</label><input type="url" id="postImg" placeholder="https://..." oninput="prev('imgPrev2',this.value)"/></div>
-          <div id="imgPrev2" style="margin-bottom:1rem;"></div>
-          <div class="form-group"><label>Short Excerpt*</label><textarea id="postExcerpt" placeholder="Short description..." style="min-height:70px;"></textarea></div>
+          <div class="form-group"><label>Image URL</label><input type="url" id="ptImg" placeholder="https://..." oninput="showPrev('ptPrev',this.value)"/></div>
+          <div id="ptPrev" style="margin-bottom:1rem;"></div>
+          <div class="form-group"><label>Short Excerpt*</label><textarea id="ptExcerpt" style="min-height:70px;" placeholder="Short description..."></textarea></div>
           <div class="form-group"><label>Full Content*</label>
-            <div style="background:var(--cream-dark);border-radius:8px;padding:.5rem;margin-bottom:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-              <button type="button" onclick="ins('<h2>','</h2>')" class="btn-edit">H2</button>
-              <button type="button" onclick="ins('<p>','</p>')" class="btn-edit">P</button>
-              <button type="button" onclick="ins('<strong>','</strong>')" class="btn-edit"><b>B</b></button>
-              <button type="button" onclick="ins('<em>','</em>')" class="btn-edit"><i>I</i></button>
-              <button type="button" onclick="ins('<ul>\n<li>','</li>\n</ul>')" class="btn-edit">List</button>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem;">
+              <button type="button" class="btn-edit" onclick="ins('<h2>','</h2>')">H2</button>
+              <button type="button" class="btn-edit" onclick="ins('<p>','</p>')">P</button>
+              <button type="button" class="btn-edit" onclick="ins('<strong>','</strong>')"><b>B</b></button>
+              <button type="button" class="btn-edit" onclick="ins('<em>','</em>')"><i>I</i></button>
+              <button type="button" class="btn-edit" onclick="ins('<ul>\n<li>','</li>\n</ul>')">List</button>
             </div>
-            <textarea id="postContent" placeholder="Full article content..." style="min-height:280px;font-family:monospace;font-size:.82rem;"></textarea>
+            <textarea id="ptContent" style="min-height:250px;font-family:monospace;font-size:.82rem;" placeholder="Full article..."></textarea>
           </div>
           <div class="form-2col">
-            <div class="form-group"><label>Published?</label><select id="postPublished"><option value="true">Yes</option><option value="false">Draft</option></select></div>
-            <div class="form-group"><label>Featured?</label><select id="postFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
+            <div class="form-group"><label>Published?</label><select id="ptPub"><option value="true">Yes</option><option value="false">Draft</option></select></div>
+            <div class="form-group"><label>Featured?</label><select id="ptFeat"><option value="false">No</option><option value="true">Yes</option></select></div>
           </div>
-          <div style="display:flex;gap:1rem;">
-            <button class="btn-gold" onclick="savePost()">💾 Save</button>
+          <div style="display:flex;gap:.8rem;">
+            <button class="btn-gold" onclick="savePost()">💾 Save Post</button>
             <button class="btn-green" onclick="showPanel('posts',null)">Cancel</button>
           </div>
-          <div id="postMsg" style="margin-top:.7rem;font-size:.85rem;"></div>
+          <p id="ptMsg" style="margin-top:.7rem;font-size:.85rem;font-weight:700;"></p>
         </div>
       </div>
 
-      <!-- ORDERS -->
       <div class="admin-panel" id="panel-orders">
         <div class="page-title">📦 Orders</div>
         <div class="table-wrap">
           <div class="table-header"><h3>All Orders</h3></div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
           <tbody id="ordersBody"></tbody></table></div>
         </div>
       </div>
 
-      <!-- USERS -->
       <div class="admin-panel" id="panel-users">
         <div class="page-title">👥 Users</div>
         <div class="table-wrap">
           <div class="table-header"><h3>All Users</h3></div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
           <tbody id="usersBody"></tbody></table></div>
         </div>
       </div>
@@ -197,131 +214,124 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-const _db = supabase.createClient(
-  'https://atdhhsqommyfdoajrcwu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA'
-);
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
-function toast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-// ── LOGIN ──
-async function adminLogin() {
+async function doLogin(){
   const email=document.getElementById('aEmail').value.trim();
-  const pass=document.getElementById('aPass').value;
-  const errEl=document.getElementById('loginErrMsg');
-  errEl.style.display='none';
-  if(!email||!pass){errEl.textContent='Email aur password daalo!';errEl.style.display='block';return;}
-  try {
+  const pass=document.getElementById('aPass').value.trim();
+  const errBox=document.getElementById('errBox');
+  const loadBox=document.getElementById('loadBox');
+  errBox.style.display='none';
+  if(!email||!pass){errBox.textContent='Email aur password daalo!';errBox.style.display='block';return;}
+  loadBox.style.display='block';
+  document.getElementById('loginBtn').disabled=true;
+  try{
     const {data,error}=await _db.auth.signInWithPassword({email,password:pass});
-    if(error) throw error;
-    // Check admin role
+    if(error){loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;errBox.textContent='❌ '+error.message;errBox.style.display='block';return;}
     const {data:profile}=await _db.from('profiles').select('role').eq('id',data.user.id).single();
     if(!profile||profile.role!=='admin'){
       await _db.auth.signOut();
-      errEl.textContent='❌ Aap admin nahi hain!';
-      errEl.style.display='block';
-      return;
+      loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;
+      errBox.textContent='❌ Aap admin nahi hain!';errBox.style.display='block';return;
     }
     document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
+    document.getElementById('adminWrap').style.display='block';
     loadDashboard();
-  } catch(e) {
-    errEl.textContent='❌ '+(e.message||'Login failed!');
-    errEl.style.display='block';
+  }catch(e){
+    loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;
+    errBox.textContent='❌ '+(e.message||'Error!');errBox.style.display='block';
   }
 }
 
-async function adminLogout() {
-  await _db.auth.signOut();
-  document.getElementById('adminPanel').style.display='none';
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('aEmail').value='';
-  document.getElementById('aPass').value='';
-}
+async function doLogout(){await _db.auth.signOut();location.reload();}
 
-// ── PANELS ──
-function showPanel(name,linkEl) {
+function showPanel(name,el){
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  if(linkEl) linkEl.classList.add('active');
-  if(name==='dashboard') loadDashboard();
-  if(name==='products') loadProducts();
-  if(name==='posts') loadPosts();
-  if(name==='orders') loadOrders();
-  if(name==='users') loadUsers();
-  if(name==='addProduct') clearProdForm();
-  if(name==='addPost') clearPostForm();
+  if(el)el.classList.add('active');
+  if(name==='dashboard')loadDashboard();
+  if(name==='products')loadProds();
+  if(name==='posts')loadPosts();
+  if(name==='orders')loadOrders();
+  if(name==='users')loadUsers();
 }
 
-// ── DASHBOARD ──
-async function loadDashboard() {
-  const [pr,po,or_,us]=await Promise.all([
-    _db.from('products').select('*',{count:'exact',head:true}),
-    _db.from('posts').select('*',{count:'exact',head:true}),
-    _db.from('orders').select('*').order('created_at',{ascending:false}).limit(10),
-    _db.from('profiles').select('*',{count:'exact',head:true})
-  ]);
-  document.getElementById('s-products').textContent=pr.count||0;
-  document.getElementById('s-posts').textContent=po.count||0;
-  document.getElementById('s-orders').textContent=or_.data?.length||0;
-  document.getElementById('s-users').textContent=us.count||0;
-  const tbody=document.getElementById('recentOrders');
-  if(!or_.data?.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Koi order nahi hai abhi</td></tr>';return;}
-  tbody.innerHTML=or_.data.map(o=>`<tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>₹${o.total||0}</td>
-    <td><span class="badge badge-${o.status==='delivered'?'delivered':'pending'}">${o.status||'pending'}</span></td>
-    <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
-    <td><button class="btn-edit" onclick="quickDeliver(${o.id})">✅ Delivered</button></td></tr>`).join('');
+async function loadDashboard(){
+  try{
+    const [a,b,c,d]=await Promise.all([
+      _db.from('products').select('*',{count:'exact',head:true}),
+      _db.from('posts').select('*',{count:'exact',head:true}),
+      _db.from('orders').select('*').order('created_at',{ascending:false}).limit(8),
+      _db.from('profiles').select('*',{count:'exact',head:true})
+    ]);
+    document.getElementById('s1').textContent=a.count||0;
+    document.getElementById('s2').textContent=b.count||0;
+    document.getElementById('s3').textContent=c.data?.length||0;
+    document.getElementById('s4').textContent=d.count||0;
+    const tb=document.getElementById('recentOrders');
+    if(!c.data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Koi order nahi abhi</td></tr>';return;}
+    tb.innerHTML=c.data.map(o=>`<tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>₹${o.total||0}</td><td>${o.status||'pending'}</td><td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td></tr>`).join('');
+  }catch(e){console.error(e);}
 }
-async function quickDeliver(id){await _db.from('orders').update({status:'delivered'}).eq('id',id);toast('✅ Done!');loadDashboard();}
 
-// ── PRODUCTS ──
-async function loadProducts() {
+async function loadProds(){
   const {data}=await _db.from('products').select('*').order('created_at',{ascending:false});
   const tb=document.getElementById('prodBody');
-  if(!data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Koi product nahi! "Add Product" se add karo.</td></tr>';return;}
+  if(!data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Koi product nahi. Add Product se add karo!</td></tr>';return;}
   tb.innerHTML=data.map(p=>`<tr>
-    <td><img src="${p.image||'https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'}" onerror="this.src='https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'"/></td>
-    <td><strong>${p.name}</strong>${p.name_hindi?`<br/><small style="font-family:'Yatra One',serif;color:#888;">${p.name_hindi}</small>`:''}</td>
-    <td>${p.category}</td><td>₹${p.price}</td><td>${p.stock||0}</td>
+    <td><img src="${p.image||'https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=60'}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;"/></td>
+    <td><strong>${p.name}</strong>${p.name_hindi?`<br/><small>${p.name_hindi}</small>`:''}</td>
+    <td>${p.category}</td><td>₹${p.price}</td>
     <td><div class="action-btns">
       <button class="btn-edit" onclick="editProd(${p.id})">✏️</button>
       <button class="btn-del" onclick="delProd(${p.id})">🗑️</button>
     </div></td></tr>`).join('');
 }
-function clearProdForm(){
-  ['prodId','prodName','prodNameHi','prodPrice','prodOrigPrice','prodStock','prodImg','prodDesc'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('prodBadge').value='';document.getElementById('prodCat').value='Herbs';
-  document.getElementById('prodFeatured').value='false';document.getElementById('imgPrev').innerHTML='';
-  document.getElementById('prodFormTitle').textContent='➕ Add Product';document.getElementById('prodMsg').textContent='';
-}
+
+function showPrev(id,url){document.getElementById(id).innerHTML=url?`<img src="${url}" style="width:70px;border-radius:7px;" onerror="this.style.display='none'"/>`:''}
+
 async function editProd(id){
-  const {data:p}=await _db.from('products').select('*').eq('id',id).single();if(!p)return;
-  document.getElementById('prodId').value=p.id;document.getElementById('prodName').value=p.name||'';
-  document.getElementById('prodNameHi').value=p.name_hindi||'';document.getElementById('prodPrice').value=p.price||'';
-  document.getElementById('prodOrigPrice').value=p.original_price||'';document.getElementById('prodStock').value=p.stock||'';
-  document.getElementById('prodImg').value=p.image||'';document.getElementById('prodDesc').value=p.description||'';
-  document.getElementById('prodCat').value=p.category||'Herbs';document.getElementById('prodBadge').value=p.badge||'';
-  document.getElementById('prodFeatured').value=String(p.featured||false);
-  if(p.image)document.getElementById('imgPrev').innerHTML=`<img src="${p.image}" style="width:80px;border-radius:8px;"/>`;
-  document.getElementById('prodFormTitle').textContent='✏️ Edit Product';
+  const {data:p}=await _db.from('products').select('*').eq('id',id).single();
+  if(!p)return;
+  document.getElementById('prodId').value=p.id;
+  document.getElementById('pName').value=p.name||'';
+  document.getElementById('pNameHi').value=p.name_hindi||'';
+  document.getElementById('pPrice').value=p.price||'';
+  document.getElementById('pOrig').value=p.original_price||'';
+  document.getElementById('pStock').value=p.stock||'';
+  document.getElementById('pImg').value=p.image||'';
+  document.getElementById('pDesc').value=p.description||'';
+  document.getElementById('pCat').value=p.category||'Herbs';
+  document.getElementById('pBadge').value=p.badge||'';
+  document.getElementById('pFeat').value=String(p.featured||false);
+  if(p.image)showPrev('pPrev',p.image);
+  document.getElementById('prodTitle').textContent='✏️ Edit Product';
   showPanel('addProduct',null);
 }
-async function delProd(id){if(!confirm('Delete?'))return;await _db.from('products').delete().eq('id',id);toast('🗑️ Deleted!');loadProducts();}
+
+async function delProd(id){
+  if(!confirm('Delete karein?'))return;
+  await _db.from('products').delete().eq('id',id);
+  toast('🗑️ Deleted!');loadProds();
+}
+
 async function saveProd(){
-  const name=document.getElementById('prodName').value.trim();
-  const price=document.getElementById('prodPrice').value;
-  const msg=document.getElementById('prodMsg');
-  if(!name||!price){msg.innerHTML='<span style="color:red;">❌ Name & Price required!</span>';return;}
-  const p={name,price:parseInt(price),name_hindi:document.getElementById('prodNameHi').value,
-    original_price:parseInt(document.getElementById('prodOrigPrice').value)||null,
-    stock:parseInt(document.getElementById('prodStock').value)||0,
-    category:document.getElementById('prodCat').value,badge:document.getElementById('prodBadge').value,
-    image:document.getElementById('prodImg').value,description:document.getElementById('prodDesc').value,
-    featured:document.getElementById('pr
+  const name=document.getElementById('pName').value.trim();
+  const price=document.getElementById('pPrice').value;
+  const msg=document.getElementById('pMsg');
+  if(!name||!price){msg.style.color='red';msg.textContent='❌ Name & Price zaroori hai!';return;}
+  const p={name,price:parseInt(price),
+    name_hindi:document.getElementById('pNameHi').value,
+    original_price:parseInt(document.getElementById('pOrig').value)||null,
+    stock:parseInt(document.getElementById('pStock').value)||0,
+    category:document.getElementById('pCat').value,
+    badge:document.getElementById('pBadge').value,
+    image:document.getElementById('pImg').value,
+    description:document.getElementById('pDesc').value,
+    featured:document.getElementById('pFeat').value==='true'};
+  const id=document.getElementById('prodId').value;
+  try{
+    if(id)await _db.from('products').update(p).eq('id',parseInt(id));
+    else await _db.from
