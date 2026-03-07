@@ -218,33 +218,29 @@
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
 async function doLogin(){
-  const email=document.getElementById('aEmail').value.trim();
   const pass=document.getElementById('aPass').value.trim();
   const errBox=document.getElementById('errBox');
-  const loadBox=document.getElementById('loadBox');
   errBox.style.display='none';
-  if(!email||!pass){errBox.textContent='Email aur password daalo!';errBox.style.display='block';return;}
-  loadBox.style.display='block';
-  document.getElementById('loginBtn').disabled=true;
-  try{
-    const {data,error}=await _db.auth.signInWithPassword({email,password:pass});
-    if(error){loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;errBox.textContent='❌ '+error.message;errBox.style.display='block';return;}
-    const {data:profile}=await _db.from('profiles').select('role').eq('id',data.user.id).single();
-    if(!profile||profile.role!=='admin'){
-      await _db.auth.signOut();
-      loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;
-      errBox.textContent='❌ Aap admin nahi hain!';errBox.style.display='block';return;
-    }
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminWrap').style.display='block';
-    loadDashboard();
-  }catch(e){
-    loadBox.style.display='none';document.getElementById('loginBtn').disabled=false;
-    errBox.textContent='❌ '+(e.message||'Error!');errBox.style.display='block';
+  // Simple password check - no Supabase auth needed
+  const ADMIN_PASS = 'PranoraAdmin2025';
+  if(pass !== ADMIN_PASS){
+    errBox.textContent='❌ Password galat hai!';
+    errBox.style.display='block';
+    return;
   }
+  sessionStorage.setItem('ph_admin','yes');
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminWrap').style.display='block';
+  loadDashboard();
 }
 
-async function doLogout(){await _db.auth.signOut();location.reload();}
+function doLogout(){sessionStorage.removeItem('ph_admin');location.reload();}
+
+// Auto login if session exists
+if(sessionStorage.getItem('ph_admin')==='yes'){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminWrap').style.display='block';
+}
 
 function showPanel(name,el){
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
@@ -334,4 +330,15 @@ async function saveProd(){
   const id=document.getElementById('prodId').value;
   try{
     if(id)await _db.from('products').update(p).eq('id',parseInt(id));
-    else await _db.from
+    else await _db.from('products').insert(p);
+    msg.style.color='green';msg.textContent='✅ Saved!';
+    setTimeout(()=>showPanel('products',null),900);
+  }catch(e){msg.style.color='red';msg.textContent='❌ '+e.message;}
+}
+
+async function loadPosts(){
+  const {data}=await _db.from('posts').select('*').order('created_at',{ascending:false});
+  const tb=document.getElementById('postsBody');
+  if(!data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Koi post nahi. Add Post se likho!</td></tr>';return;}
+  tb.innerHTML=data.map(p=>`<tr>
+    <td><strong>${p.title}</strong>${p.title_hindi?`<br/><small>$
