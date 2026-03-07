@@ -3,360 +3,322 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel — PranoraHealth</title>
+  <title>Admin — PranoraHealth</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700&family=Yatra+One&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- Loading screen -->
-<div id="authLoading" style="position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1rem;">
-  <img src="1760520800681.png" style="width:80px;border-radius:50%;border:3px solid var(--gold);animation:spin 2s linear infinite;"/>
-  <p style="font-family:'Cormorant Garamond',serif;color:var(--green);font-size:1.1rem;">Checking access...</p>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
-<nav id="navbar" style="position:sticky;top:0;z-index:200;display:none;">
-  <a href="index.html" class="nav-logo">
-    <img src="1760520800681.png" alt="PranoraHealth" class="logo-img"/>
-    <div class="logo-text">
-      <span class="logo-main">Pranora<span>Health</span></span>
-      <span class="logo-sub">Admin Panel</span>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--green);padding:2rem;">
+  <div style="background:white;border-radius:18px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:4px solid var(--gold);text-align:center;">
+    <img src="1760520800681.png" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);margin-bottom:1rem;"/>
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--green);font-size:1.5rem;margin-bottom:.3rem;">Admin Login</h2>
+    <p style="font-size:.8rem;color:#888;margin-bottom:1.5rem;">PranoraHealth Admin Panel</p>
+    <div id="loginErrMsg" style="background:#ffeaea;border:1px solid #ffb3b3;border-radius:8px;padding:.6rem;font-size:.82rem;color:#c0392b;margin-bottom:1rem;display:none;"></div>
+    <div class="form-group" style="text-align:left;">
+      <label>Email</label>
+      <input type="email" id="aEmail" placeholder="admin@email.com" style="width:100%;"/>
     </div>
-  </a>
-  <div class="nav-right">
-    <a href="index.html" class="nav-user-btn">🌿 View Site</a>
-    <button class="nav-user-btn" onclick="doLogout()" style="cursor:pointer;background:rgba(231,76,60,.15);color:#e74c3c;border-color:rgba(231,76,60,.3);">Logout</button>
+    <div class="form-group" style="text-align:left;">
+      <label>Password</label>
+      <input type="password" id="aPass" placeholder="Password" onkeypress="if(event.key==='Enter')adminLogin()" style="width:100%;"/>
+    </div>
+    <button onclick="adminLogin()" class="btn-gold" style="width:100%;font-size:1rem;padding:.85rem;">Login to Admin →</button>
   </div>
-</nav>
-
-<div id="adminContent" style="display:none;">
-<div class="admin-layout">
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <ul class="sidebar-menu">
-      <li><a href="#" class="active" onclick="showPanel('dashboard',this)">📊 Dashboard</a></li>
-      <li><a href="#" onclick="showPanel('products',this)">🛒 Products</a></li>
-      <li><a href="#" onclick="showPanel('addProduct',this)">➕ Add Product</a></li>
-      <li><a href="#" onclick="showPanel('posts',this)">📝 Blog Posts</a></li>
-      <li><a href="#" onclick="showPanel('addPost',this)">✏️ Add Post</a></li>
-      <li><a href="#" onclick="showPanel('orders',this)">📦 Orders</a></li>
-      <li><a href="#" onclick="showPanel('users',this)">👥 Users</a></li>
-    </ul>
-  </aside>
-
-  <main class="admin-main">
-
-    <!-- DASHBOARD -->
-    <div class="admin-panel active" id="panel-dashboard">
-      <div class="page-title">📊 Dashboard</div>
-      <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="snum">-</div><div class="slbl">Products</div></div>
-        <div class="stat-card"><div class="snum">-</div><div class="slbl">Blog Posts</div></div>
-        <div class="stat-card"><div class="snum">-</div><div class="slbl">Orders</div></div>
-        <div class="stat-card"><div class="snum">-</div><div class="slbl">Users</div></div>
-      </div>
-      <div class="table-wrap">
-        <div class="table-header"><h3>Recent Orders</h3></div>
-        <div style="overflow-x:auto;">
-          <table><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-          <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">No orders yet</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRODUCTS LIST -->
-    <div class="admin-panel" id="panel-products">
-      <div class="page-title">🛒 All Products</div>
-      <div class="table-wrap">
-        <div class="table-header">
-          <h3>Products</h3>
-          <button class="btn-gold" onclick="showPanel('addProduct',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button>
-        </div>
-        <div style="overflow-x:auto;">
-          <table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
-          <tbody id="prodBody"><tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ADD/EDIT PRODUCT -->
-    <div class="admin-panel" id="panel-addProduct">
-      <div class="page-title" id="prodFormTitle">➕ Add Product</div>
-      <div class="form-card">
-        <input type="hidden" id="prodId"/>
-        <div class="form-2col">
-          <div class="form-group"><label>Product Name (English)*</label><input type="text" id="prodName" placeholder="e.g. Ashwagandha Gold"/></div>
-          <div class="form-group"><label>Product Name (Hindi)</label><input type="text" id="prodNameHi" placeholder="e.g. अश्वगंधा गोल्ड"/></div>
-        </div>
-        <div class="form-2col">
-          <div class="form-group"><label>Category*</label>
-            <select id="prodCat">
-              <option>Herbs</option><option>Cosmetics</option><option>Supplements</option>
-              <option>Skin Care</option><option>Hair Care</option><option>Herbal Tea</option>
-              <option>Wellness</option><option>Women Care</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Badge</label>
-            <select id="prodBadge"><option value="">None</option><option>BESTSELLER</option><option>NEW</option><option>SALE</option><option>HOT</option></select>
-          </div>
-        </div>
-        <div class="form-2col">
-          <div class="form-group"><label>Price (₹)*</label><input type="number" id="prodPrice" placeholder="499"/></div>
-          <div class="form-group"><label>Original Price (₹)</label><input type="number" id="prodOrigPrice" placeholder="799"/></div>
-        </div>
-        <div class="form-2col">
-          <div class="form-group"><label>Stock</label><input type="number" id="prodStock" placeholder="100"/></div>
-          <div class="form-group"><label>Featured?</label>
-            <select id="prodFeatured"><option value="false">No</option><option value="true">Yes</option></select>
-          </div>
-        </div>
-        <div class="form-group"><label>Image URL</label><input type="url" id="prodImg" placeholder="https://..." oninput="previewImg('imgPreview',this.value)"/></div>
-        <div id="imgPreview" style="margin-bottom:1rem;"></div>
-        <div class="form-group"><label>Description*</label><textarea id="prodDesc" placeholder="Product description..."></textarea></div>
-        <div style="display:flex;gap:1rem;">
-          <button class="btn-gold" onclick="submitProduct()">💾 Save Product</button>
-          <button class="btn-green" onclick="showPanel('products',null)">Cancel</button>
-        </div>
-        <div class="error-box" id="prodErr" style="margin-top:.7rem;"></div>
-        <div class="success-box" id="prodOk" style="margin-top:.7rem;"></div>
-      </div>
-    </div>
-
-    <!-- BLOG POSTS -->
-    <div class="admin-panel" id="panel-posts">
-      <div class="page-title">📝 Blog Posts</div>
-      <div class="table-wrap">
-        <div class="table-header">
-          <h3>All Posts</h3>
-          <button class="btn-gold" onclick="showPanel('addPost',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button>
-        </div>
-        <div style="overflow-x:auto;">
-          <table><thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
-          <tbody id="postsBody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ADD/EDIT POST -->
-    <div class="admin-panel" id="panel-addPost">
-      <div class="page-title" id="postFormTitle">✏️ Add Blog Post</div>
-      <div class="form-card">
-        <input type="hidden" id="postId"/>
-        <div class="form-2col">
-          <div class="form-group"><label>Title (English)*</label><input type="text" id="postTitle" placeholder="Post title..."/></div>
-          <div class="form-group"><label>Title (Hindi)</label><input type="text" id="postTitleHi" placeholder="पोस्ट शीर्षक..."/></div>
-        </div>
-        <div class="form-2col">
-          <div class="form-group"><label>Category*</label>
-            <select id="postCat">
-              <option>Herbs</option><option>Skin Care</option><option>Hair Care</option>
-              <option>Wellness</option><option>Remedies</option><option>Supplements</option><option>Women Care</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Author</label><input type="text" id="postAuthor" placeholder="Dr. Name"/></div>
-        </div>
-        <div class="form-group"><label>Featured Image URL</label><input type="url" id="postImg" placeholder="https://..." oninput="previewImg('imgPreview2',this.value)"/></div>
-        <div id="imgPreview2" style="margin-bottom:1rem;"></div>
-        <div class="form-group"><label>Short Excerpt*</label><textarea id="postExcerpt" placeholder="Short description..." style="min-height:70px;"></textarea></div>
-        <div class="form-group"><label>Full Content*</label>
-          <div style="background:var(--cream-dark);border-radius:8px;padding:.5rem;margin-bottom:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-            <button type="button" onclick="ins('<h2>','</h2>')" class="btn-edit">H2</button>
-            <button type="button" onclick="ins('<p>','</p>')" class="btn-edit">P</button>
-            <button type="button" onclick="ins('<strong>','</strong>')" class="btn-edit"><b>B</b></button>
-            <button type="button" onclick="ins('<em>','</em>')" class="btn-edit"><i>I</i></button>
-            <button type="button" onclick="ins('<ul>\n<li>','</li>\n</ul>')" class="btn-edit">List</button>
-            <button type="button" onclick="ins('<blockquote>','</blockquote>')" class="btn-edit">Quote</button>
-          </div>
-          <textarea id="postContent" placeholder="Full article..." style="min-height:300px;font-family:monospace;font-size:.82rem;"></textarea>
-        </div>
-        <div class="form-2col">
-          <div class="form-group"><label>Published?</label>
-            <select id="postPublished"><option value="true">Yes - Public</option><option value="false">No - Draft</option></select>
-          </div>
-          <div class="form-group"><label>Featured?</label>
-            <select id="postFeatured"><option value="false">No</option><option value="true">Yes</option></select>
-          </div>
-        </div>
-        <div style="display:flex;gap:1rem;">
-          <button class="btn-gold" onclick="submitPost()">💾 Save Post</button>
-          <button class="btn-green" onclick="showPanel('posts',null)">Cancel</button>
-        </div>
-        <div class="error-box" id="postErr" style="margin-top:.7rem;"></div>
-        <div class="success-box" id="postOk" style="margin-top:.7rem;"></div>
-      </div>
-    </div>
-
-    <!-- ORDERS -->
-    <div class="admin-panel" id="panel-orders">
-      <div class="page-title">📦 Orders</div>
-      <div class="table-wrap">
-        <div class="table-header"><h3>All Orders</h3></div>
-        <div style="overflow-x:auto;">
-          <table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead>
-          <tbody id="ordersBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- USERS -->
-    <div class="admin-panel" id="panel-users">
-      <div class="page-title">👥 Users</div>
-      <div class="table-wrap">
-        <div class="table-header"><h3>All Users</h3></div>
-        <div style="overflow-x:auto;">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
-          <tbody id="usersBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </main>
 </div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none;">
+  <nav style="position:sticky;top:0;z-index:200;background:var(--green);border-bottom:2px solid var(--gold);padding:.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between;">
+    <a href="index.html" style="display:flex;align-items:center;gap:.7rem;text-decoration:none;">
+      <img src="1760520800681.png" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);"/>
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;color:var(--cream);font-size:1rem;font-weight:700;">Pranora<span style="color:var(--gold);">Health</span></div>
+        <div style="font-size:.65rem;color:var(--gold-light);">Admin Panel</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:.6rem;">
+      <a href="index.html" style="color:var(--gold);text-decoration:none;font-size:.8rem;font-weight:700;padding:.35rem .8rem;border:1px solid rgba(201,168,76,.3);border-radius:6px;">🌿 Site</a>
+      <button onclick="adminLogout()" style="background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.3);border-radius:6px;padding:.35rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Logout</button>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" class="active" onclick="showPanel('dashboard',this)">📊 Dashboard</a></li>
+        <li><a href="#" onclick="showPanel('products',this)">🛒 Products</a></li>
+        <li><a href="#" onclick="showPanel('addProduct',this)">➕ Add Product</a></li>
+        <li><a href="#" onclick="showPanel('posts',this)">📝 Blog Posts</a></li>
+        <li><a href="#" onclick="showPanel('addPost',this)">✏️ Add Post</a></li>
+        <li><a href="#" onclick="showPanel('orders',this)">📦 Orders</a></li>
+        <li><a href="#" onclick="showPanel('users',this)">👥 Users</a></li>
+      </ul>
+    </aside>
+
+    <main class="admin-main">
+
+      <!-- DASHBOARD -->
+      <div class="admin-panel active" id="panel-dashboard">
+        <div class="page-title">📊 Dashboard</div>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="snum" id="s-products">...</div><div class="slbl">Products</div></div>
+          <div class="stat-card"><div class="snum" id="s-posts">...</div><div class="slbl">Blog Posts</div></div>
+          <div class="stat-card"><div class="snum" id="s-orders">...</div><div class="slbl">Orders</div></div>
+          <div class="stat-card"><div class="snum" id="s-users">...</div><div class="slbl">Users</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>Recent Orders</h3></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS LIST -->
+      <div class="admin-panel" id="panel-products">
+        <div class="page-title">🛒 Products</div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>All Products</h3><button class="btn-gold" onclick="showPanel('addProduct',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="prodBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ADD PRODUCT -->
+      <div class="admin-panel" id="panel-addProduct">
+        <div class="page-title" id="prodFormTitle">➕ Add Product</div>
+        <div class="form-card">
+          <input type="hidden" id="prodId"/>
+          <div class="form-2col">
+            <div class="form-group"><label>Name (English)*</label><input type="text" id="prodName" placeholder="Ashwagandha Gold"/></div>
+            <div class="form-group"><label>Name (Hindi)</label><input type="text" id="prodNameHi" placeholder="अश्वगंधा गोल्ड"/></div>
+          </div>
+          <div class="form-2col">
+            <div class="form-group"><label>Category*</label>
+              <select id="prodCat"><option>Herbs</option><option>Cosmetics</option><option>Supplements</option><option>Skin Care</option><option>Hair Care</option><option>Herbal Tea</option><option>Wellness</option><option>Women Care</option></select>
+            </div>
+            <div class="form-group"><label>Badge</label>
+              <select id="prodBadge"><option value="">None</option><option>BESTSELLER</option><option>NEW</option><option>SALE</option><option>HOT</option></select>
+            </div>
+          </div>
+          <div class="form-2col">
+            <div class="form-group"><label>Price (₹)*</label><input type="number" id="prodPrice" placeholder="499"/></div>
+            <div class="form-group"><label>Original Price (₹)</label><input type="number" id="prodOrigPrice" placeholder="799"/></div>
+          </div>
+          <div class="form-2col">
+            <div class="form-group"><label>Stock</label><input type="number" id="prodStock" placeholder="100"/></div>
+            <div class="form-group"><label>Featured?</label><select id="prodFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
+          </div>
+          <div class="form-group"><label>Image URL</label><input type="url" id="prodImg" placeholder="https://..." oninput="prev('imgPrev',this.value)"/></div>
+          <div id="imgPrev" style="margin-bottom:1rem;"></div>
+          <div class="form-group"><label>Description*</label><textarea id="prodDesc" placeholder="Product description..."></textarea></div>
+          <div style="display:flex;gap:1rem;">
+            <button class="btn-gold" onclick="saveProd()">💾 Save</button>
+            <button class="btn-green" onclick="showPanel('products',null)">Cancel</button>
+          </div>
+          <div id="prodMsg" style="margin-top:.7rem;font-size:.85rem;"></div>
+        </div>
+      </div>
+
+      <!-- BLOG POSTS -->
+      <div class="admin-panel" id="panel-posts">
+        <div class="page-title">📝 Blog Posts</div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>All Posts</h3><button class="btn-gold" onclick="showPanel('addPost',null)" style="padding:.4rem .9rem;font-size:.82rem;">+ Add New</button></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="postsBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ADD POST -->
+      <div class="admin-panel" id="panel-addPost">
+        <div class="page-title" id="postFormTitle">✏️ Add Post</div>
+        <div class="form-card">
+          <input type="hidden" id="postId"/>
+          <div class="form-2col">
+            <div class="form-group"><label>Title (English)*</label><input type="text" id="postTitle" placeholder="Post title..."/></div>
+            <div class="form-group"><label>Title (Hindi)</label><input type="text" id="postTitleHi" placeholder="शीर्षक..."/></div>
+          </div>
+          <div class="form-2col">
+            <div class="form-group"><label>Category*</label>
+              <select id="postCat"><option>Herbs</option><option>Skin Care</option><option>Hair Care</option><option>Wellness</option><option>Remedies</option><option>Supplements</option><option>Women Care</option></select>
+            </div>
+            <div class="form-group"><label>Author</label><input type="text" id="postAuthor" placeholder="Dr. Name"/></div>
+          </div>
+          <div class="form-group"><label>Image URL</label><input type="url" id="postImg" placeholder="https://..." oninput="prev('imgPrev2',this.value)"/></div>
+          <div id="imgPrev2" style="margin-bottom:1rem;"></div>
+          <div class="form-group"><label>Short Excerpt*</label><textarea id="postExcerpt" placeholder="Short description..." style="min-height:70px;"></textarea></div>
+          <div class="form-group"><label>Full Content*</label>
+            <div style="background:var(--cream-dark);border-radius:8px;padding:.5rem;margin-bottom:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+              <button type="button" onclick="ins('<h2>','</h2>')" class="btn-edit">H2</button>
+              <button type="button" onclick="ins('<p>','</p>')" class="btn-edit">P</button>
+              <button type="button" onclick="ins('<strong>','</strong>')" class="btn-edit"><b>B</b></button>
+              <button type="button" onclick="ins('<em>','</em>')" class="btn-edit"><i>I</i></button>
+              <button type="button" onclick="ins('<ul>\n<li>','</li>\n</ul>')" class="btn-edit">List</button>
+            </div>
+            <textarea id="postContent" placeholder="Full article content..." style="min-height:280px;font-family:monospace;font-size:.82rem;"></textarea>
+          </div>
+          <div class="form-2col">
+            <div class="form-group"><label>Published?</label><select id="postPublished"><option value="true">Yes</option><option value="false">Draft</option></select></div>
+            <div class="form-group"><label>Featured?</label><select id="postFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
+          </div>
+          <div style="display:flex;gap:1rem;">
+            <button class="btn-gold" onclick="savePost()">💾 Save</button>
+            <button class="btn-green" onclick="showPanel('posts',null)">Cancel</button>
+          </div>
+          <div id="postMsg" style="margin-top:.7rem;font-size:.85rem;"></div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="admin-panel" id="panel-orders">
+        <div class="page-title">📦 Orders</div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>All Orders</h3></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead>
+          <tbody id="ordersBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="admin-panel" id="panel-users">
+        <div class="page-title">👥 Users</div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>All Users</h3></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody id="usersBody"></tbody></table></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-const SUPA_URL = 'https://atdhhsqommyfdoajrcwu.supabase.co';
-const SUPA_KEY = 'sb_publishable_0-PwYxjTiT-LJDCZOgyNTQ_Dl1FhlE9';
-const _db = supabase.createClient(SUPA_URL, SUPA_KEY);
+const _db = supabase.createClient(
+  'https://atdhhsqommyfdoajrcwu.supabase.co',
+  'sb_publishable_0-PwYxjTiT-LJDCZOgyNTQ_Dl1FhlE9'
+);
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ── AUTH GUARD ──
-async function checkAdmin() {
+// ── LOGIN ──
+async function adminLogin() {
+  const email=document.getElementById('aEmail').value.trim();
+  const pass=document.getElementById('aPass').value;
+  const errEl=document.getElementById('loginErrMsg');
+  errEl.style.display='none';
+  if(!email||!pass){errEl.textContent='Email aur password daalo!';errEl.style.display='block';return;}
   try {
-    const { data: { user } } = await _db.auth.getUser();
-    if (!user) { window.location.href = 'login.html'; return false; }
-    const { data: profile } = await _db.from('profiles').select('role').eq('id', user.id).single();
-    if (!profile || profile.role !== 'admin') {
-      alert('Admin access only! Please login as admin.');
-      window.location.href = 'login.html';
-      return false;
+    const {data,error}=await _db.auth.signInWithPassword({email,password:pass});
+    if(error) throw error;
+    // Check admin role
+    const {data:profile}=await _db.from('profiles').select('role').eq('id',data.user.id).single();
+    if(!profile||profile.role!=='admin'){
+      await _db.auth.signOut();
+      errEl.textContent='❌ Aap admin nahi hain!';
+      errEl.style.display='block';
+      return;
     }
-    return true;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    loadDashboard();
   } catch(e) {
-    window.location.href = 'login.html';
-    return false;
+    errEl.textContent='❌ '+(e.message||'Login failed!');
+    errEl.style.display='block';
   }
 }
 
-async function doLogout() {
+async function adminLogout() {
   await _db.auth.signOut();
-  window.location.href = 'index.html';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('aEmail').value='';
+  document.getElementById('aPass').value='';
 }
 
 // ── PANELS ──
-function showPanel(name, linkEl) {
-  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+function showPanel(name,linkEl) {
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  if (linkEl) linkEl.classList.add('active');
-  if (name==='dashboard') loadDashboard();
-  if (name==='products') loadProducts();
-  if (name==='posts') loadPosts();
-  if (name==='orders') loadOrders();
-  if (name==='users') loadUsers();
-  if (name==='addProduct') clearProductForm();
-  if (name==='addPost') clearPostForm();
+  if(linkEl) linkEl.classList.add('active');
+  if(name==='dashboard') loadDashboard();
+  if(name==='products') loadProducts();
+  if(name==='posts') loadPosts();
+  if(name==='orders') loadOrders();
+  if(name==='users') loadUsers();
+  if(name==='addProduct') clearProdForm();
+  if(name==='addPost') clearPostForm();
 }
 
 // ── DASHBOARD ──
 async function loadDashboard() {
-  const [pr, po, or_, us] = await Promise.all([
-    _db.from('products').select('*', {count:'exact', head:true}),
-    _db.from('posts').select('*', {count:'exact', head:true}),
+  const [pr,po,or_,us]=await Promise.all([
+    _db.from('products').select('*',{count:'exact',head:true}),
+    _db.from('posts').select('*',{count:'exact',head:true}),
     _db.from('orders').select('*').order('created_at',{ascending:false}).limit(10),
-    _db.from('profiles').select('*', {count:'exact', head:true})
+    _db.from('profiles').select('*',{count:'exact',head:true})
   ]);
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="snum">${pr.count||0}</div><div class="slbl">Products</div></div>
-    <div class="stat-card"><div class="snum">${po.count||0}</div><div class="slbl">Blog Posts</div></div>
-    <div class="stat-card"><div class="snum">${or_.data?.length||0}</div><div class="slbl">Recent Orders</div></div>
-    <div class="stat-card"><div class="snum">${us.count||0}</div><div class="slbl">Users</div></div>`;
-  const tbody = document.getElementById('recentOrders');
-  if (!or_.data?.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:#888;">No orders yet</td></tr>'; return; }
-  tbody.innerHTML = or_.data.map(o=>`
-    <tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>₹${o.total||0}</td>
+  document.getElementById('s-products').textContent=pr.count||0;
+  document.getElementById('s-posts').textContent=po.count||0;
+  document.getElementById('s-orders').textContent=or_.data?.length||0;
+  document.getElementById('s-users').textContent=us.count||0;
+  const tbody=document.getElementById('recentOrders');
+  if(!or_.data?.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Koi order nahi hai abhi</td></tr>';return;}
+  tbody.innerHTML=or_.data.map(o=>`<tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>₹${o.total||0}</td>
     <td><span class="badge badge-${o.status==='delivered'?'delivered':'pending'}">${o.status||'pending'}</span></td>
     <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
-    <td><button class="btn-edit" onclick="markDelivered(${o.id})">Delivered</button></td></tr>`).join('');
+    <td><button class="btn-edit" onclick="quickDeliver(${o.id})">✅ Delivered</button></td></tr>`).join('');
 }
-async function markDelivered(id) {
-  await _db.from('orders').update({status:'delivered'}).eq('id',id);
-  showToast('✅ Order marked delivered!');
-  loadDashboard();
-}
+async function quickDeliver(id){await _db.from('orders').update({status:'delivered'}).eq('id',id);toast('✅ Done!');loadDashboard();}
 
 // ── PRODUCTS ──
 async function loadProducts() {
-  const { data } = await _db.from('products').select('*').order('created_at',{ascending:false});
-  const tbody = document.getElementById('prodBody');
-  if (!data?.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">No products yet! Add your first product.</td></tr>'; return; }
-  tbody.innerHTML = data.map(p=>`
-    <tr>
-      <td><img src="${p.image||'https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'}" onerror="this.src='https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'"/></td>
-      <td><strong>${p.name}</strong>${p.name_hindi?`<br/><small style="color:#888;font-family:'Yatra One',serif">${p.name_hindi}</small>`:''}</td>
-      <td>${p.category}</td><td>₹${p.price}</td><td>${p.stock||0}</td>
-      <td><div class="action-btns">
-        <button class="btn-edit" onclick="editProduct(${p.id})">✏️ Edit</button>
-        <button class="btn-del" onclick="delProduct(${p.id})">🗑️</button>
-      </div></td>
-    </tr>`).join('');
+  const {data}=await _db.from('products').select('*').order('created_at',{ascending:false});
+  const tb=document.getElementById('prodBody');
+  if(!data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Koi product nahi! "Add Product" se add karo.</td></tr>';return;}
+  tb.innerHTML=data.map(p=>`<tr>
+    <td><img src="${p.image||'https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'}" onerror="this.src='https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'"/></td>
+    <td><strong>${p.name}</strong>${p.name_hindi?`<br/><small style="font-family:'Yatra One',serif;color:#888;">${p.name_hindi}</small>`:''}</td>
+    <td>${p.category}</td><td>₹${p.price}</td><td>${p.stock||0}</td>
+    <td><div class="action-btns">
+      <button class="btn-edit" onclick="editProd(${p.id})">✏️</button>
+      <button class="btn-del" onclick="delProd(${p.id})">🗑️</button>
+    </div></td></tr>`).join('');
 }
-function clearProductForm() {
-  ['prodId','prodName','prodNameHi','prodPrice','prodOrigPrice','prodStock','prodImg','prodDesc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('prodBadge').value='';
-  document.getElementById('prodCat').value='Herbs';
-  document.getElementById('prodFeatured').value='false';
-  document.getElementById('imgPreview').innerHTML='';
-  document.getElementById('prodFormTitle').textContent='➕ Add Product';
-  document.getElementById('prodErr').className='error-box';
-  document.getElementById('prodOk').className='success-box';
+function clearProdForm(){
+  ['prodId','prodName','prodNameHi','prodPrice','prodOrigPrice','prodStock','prodImg','prodDesc'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('prodBadge').value='';document.getElementById('prodCat').value='Herbs';
+  document.getElementById('prodFeatured').value='false';document.getElementById('imgPrev').innerHTML='';
+  document.getElementById('prodFormTitle').textContent='➕ Add Product';document.getElementById('prodMsg').textContent='';
 }
-async function editProduct(id) {
-  const { data: p } = await _db.from('products').select('*').eq('id',id).single();
-  if(!p) return;
-  document.getElementById('prodId').value=p.id;
-  document.getElementById('prodName').value=p.name||'';
-  document.getElementById('prodNameHi').value=p.name_hindi||'';
-  document.getElementById('prodPrice').value=p.price||'';
-  document.getElementById('prodOrigPrice').value=p.original_price||'';
-  document.getElementById('prodStock').value=p.stock||'';
-  document.getElementById('prodImg').value=p.image||'';
-  document.getElementById('prodDesc').value=p.description||'';
-  document.getElementById('prodCat').value=p.category||'Herbs';
-  document.getElementById('prodBadge').value=p.badge||'';
+async function editProd(id){
+  const {data:p}=await _db.from('products').select('*').eq('id',id).single();if(!p)return;
+  document.getElementById('prodId').value=p.id;document.getElementById('prodName').value=p.name||'';
+  document.getElementById('prodNameHi').value=p.name_hindi||'';document.getElementById('prodPrice').value=p.price||'';
+  document.getElementById('prodOrigPrice').value=p.original_price||'';document.getElementById('prodStock').value=p.stock||'';
+  document.getElementById('prodImg').value=p.image||'';document.getElementById('prodDesc').value=p.description||'';
+  document.getElementById('prodCat').value=p.category||'Herbs';document.getElementById('prodBadge').value=p.badge||'';
   document.getElementById('prodFeatured').value=String(p.featured||false);
-  if(p.image) document.getElementById('imgPreview').innerHTML=`<img src="${p.image}" style="width:80px;border-radius:8px;"/>`;
+  if(p.image)document.getElementById('imgPrev').innerHTML=`<img src="${p.image}" style="width:80px;border-radius:8px;"/>`;
   document.getElementById('prodFormTitle').textContent='✏️ Edit Product';
   showPanel('addProduct',null);
 }
-async function delProduct(id) {
-  if(!confirm('Delete this product?')) return;
-  await _db.from('products').delete().eq('id',id);
-  showToast('🗑️ Product deleted!');
-  loadProducts();
-}
-async function submitProduct() {
+async function delProd(id){if(!confirm('Delete?'))return;await _db.from('products').delete().eq('id',id);toast('🗑️ Deleted!');loadProducts();}
+async function saveProd(){
   const name=document.getElementById('prodName').value.trim();
   const price=document.getElementById('prodPrice').value;
-  const errEl=document.getElementById('prodErr');
-  const okEl=document.getElementById('prodOk');
-  errEl.className='error-box'; okEl.className='success-box';
-  if(!name||!price){errEl.textContent='Name & Price required!';errEl.className='error-box show';return;}
+  const msg=document.getElementById('prodMsg');
+  if(!name||!price){msg.innerHTML='<span style="color:red;">❌ Name & Price required!</span>';return;}
   const p={name,price:parseInt(price),name_hindi:document.getElementById('prodNameHi').value,
     original_price:parseInt(document.getElementById('prodOrigPrice').value)||null,
     stock:parseInt(document.getElementById('prodStock').value)||0,
@@ -364,21 +326,6 @@ async function submitProduct() {
     image:document.getElementById('prodImg').value,description:document.getElementById('prodDesc').value,
     featured:document.getElementById('prodFeatured').value==='true'};
   const id=document.getElementById('prodId').value;
-  try {
-    if(id){await _db.from('products').update(p).eq('id',parseInt(id));}
-    else{await _db.from('products').insert(p);}
-    okEl.textContent='✅ Product saved!';okEl.className='success-box show';
-    setTimeout(()=>showPanel('products',null),1200);
-  }catch(e){errEl.textContent='❌ '+e.message;errEl.className='error-box show';}
-}
-
-// ── POSTS ──
-async function loadPosts() {
-  const { data } = await _db.from('posts').select('*').order('created_at',{ascending:false});
-  const tbody=document.getElementById('postsBody');
-  if(!data?.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">No posts yet! Write your first blog post.</td></tr>';return;}
-  tbody.innerHTML=data.map(p=>`
-    <tr>
-      <td><strong>${p.title}</strong>${p.title_hindi?`<br/><small style="color:#888;">${p.title_hindi}</small>`:''}</td>
-      <td>${p.category}</td><td>${p.views||0}</td>
-      <td>${new Date(p.creat
+  try{
+    if(id)await _db.from('products').update(p).eq('id',parseInt(id));
+   
