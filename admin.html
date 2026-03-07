@@ -201,7 +201,7 @@
 <script>
 const _db = supabase.createClient(
   'https://atdhhsqommyfdoajrcwu.supabase.co',
-  'sb_publishable_0-PwYxjTiT-LJDCZOgyNTQ_Dl1FhlE9'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA'
 );
 
 function toast(msg) {
@@ -324,8 +324,4 @@ async function saveProd(){
     stock:parseInt(document.getElementById('prodStock').value)||0,
     category:document.getElementById('prodCat').value,badge:document.getElementById('prodBadge').value,
     image:document.getElementById('prodImg').value,description:document.getElementById('prodDesc').value,
-    featured:document.getElementById('prodFeatured').value==='true'};
-  const id=document.getElementById('prodId').value;
-  try{
-    if(id)await _db.from('products').update(p).eq('id',parseInt(id));
-   
+    featured:document.getElementById('pr
