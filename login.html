@@ -11,12 +11,19 @@
 <nav id="navbar">
   <a href="index.html" class="nav-logo">
     <img src="1760520800681.png" alt="PranoraHealth" class="logo-img"/>
-    <div class="logo-text"><span class="logo-main">Pranora<span>Health</span></span><span class="logo-sub">प्राकृतिक स्वास्थ्य</span></div>
+    <div class="logo-text">
+      <span class="logo-main">Pranora<span>Health</span></span>
+      <span class="logo-sub">प्राकृतिक स्वास्थ्य</span>
+    </div>
   </a>
   <div class="nav-links">
-    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="blog.html">Blog</a>
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="blog.html">Blog</a>
   </div>
-  <div class="nav-right"><div id="userNav"></div></div>
+  <div class="nav-right">
+    <a href="login.html" class="nav-login-btn">Login / Register</a>
+  </div>
 </nav>
 
 <div class="auth-wrap">
@@ -42,7 +49,7 @@
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="loginPass" placeholder="Enter password" onkeypress="if(event.key==='Enter') doLogin()"/>
+        <input type="password" id="loginPass" placeholder="Enter password"/>
       </div>
       <button class="btn-gold" style="width:100%;margin-top:.5rem;" onclick="doLogin()">Login 🌿</button>
       <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#888;">
@@ -75,59 +82,73 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+
+<!-- Supabase FIRST, then app.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+  // Supabase setup directly here
+  const SUPA_URL = 'https://atdhhsqommyfdoajrcwu.supabase.co';
+  const SUPA_KEY = 'sb_publishable_0-PwYxjTiT-LJDCZOgyNTQ_Dl1FhlE9';
+  const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
   function switchTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+    document.querySelectorAll('.auth-tab').forEach((t,i) => {
+      t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
+    });
     document.getElementById('loginPane').classList.toggle('active', tab==='login');
     document.getElementById('registerPane').classList.toggle('active', tab==='register');
   }
 
+  function showMsg(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = (type==='ok' ? 'success-box' : 'error-box') + ' show';
+  }
+
   async function doLogin() {
     const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    const err = document.getElementById('loginErr');
-    const ok = document.getElementById('loginOk');
-    err.classList.remove('show'); ok.classList.remove('show');
-    if (!email || !pass) { err.textContent='Please fill all fields'; err.classList.add('show'); return; }
+    const pass  = document.getElementById('loginPass').value;
+    if (!email || !pass) { showMsg('loginErr','Please fill all fields!','err'); return; }
+    document.getElementById('loginErr').className='error-box';
+    document.getElementById('loginOk').className='success-box';
     try {
-      const { user } = await signIn(email, pass);
-      // Check if admin
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-      ok.textContent = '✅ Login successful! Redirecting...'; ok.classList.add('show');
-      setTimeout(() => { window.location.href = profile?.role === 'admin' ? 'admin.html' : 'index.html'; }, 1200);
+      const { data, error } = await _supa.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+      // Check role
+      const { data: profile } = await _supa.from('profiles').select('role').eq('id', data.user.id).single();
+      showMsg('loginOk', '✅ Login successful! Redirecting...', 'ok');
+      setTimeout(() => {
+        window.location.href = profile?.role === 'admin' ? 'admin.html' : 'index.html';
+      }, 1200);
     } catch(e) {
-      err.textContent = '❌ ' + (e.message || 'Login failed. Check credentials.');
-      err.classList.add('show');
+      showMsg('loginErr', '❌ ' + (e.message || 'Login failed!'), 'err');
     }
   }
 
   async function doRegister() {
-    const name = document.getElementById('regName').value.trim();
+    const name  = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPass').value;
-    const err = document.getElementById('regErr');
-    const ok = document.getElementById('regOk');
-    err.classList.remove('show'); ok.classList.remove('show');
-    if (!name || !email || !pass) { err.textContent='Please fill all fields'; err.classList.add('show'); return; }
-    if (pass.length < 6) { err.textContent='Password must be 6+ characters'; err.classList.add('show'); return; }
+    const pass  = document.getElementById('regPass').value;
+    if (!name||!email||!pass) { showMsg('regErr','Please fill all fields!','err'); return; }
+    if (pass.length < 6)      { showMsg('regErr','Password must be 6+ characters','err'); return; }
+    document.getElementById('regErr').className='error-box';
+    document.getElementById('regOk').className='success-box';
     try {
-      await signUp(email, pass, name);
-      ok.textContent = '✅ Account created! Please check your email to confirm.';
-      ok.classList.add('show');
-      // Save profile
-      const user = await getUser();
-      if (user) await supabase.from('profiles').upsert({ id: user.id, name, email, role: 'user' });
+      const { data, error } = await _supa.auth.signUp({ email, password: pass, options:{ data:{ name } } });
+      if (error) throw error;
+      if (data.user) {
+        await _supa.from('profiles').upsert({ id: data.user.id, name, email, role: 'user' });
+      }
+      showMsg('regOk', '✅ Account created! Check email to confirm.', 'ok');
     } catch(e) {
-      err.textContent = '❌ ' + (e.message || 'Registration failed.');
-      err.classList.add('show');
+      showMsg('regErr', '❌ ' + (e.message || 'Registration failed!'), 'err');
     }
   }
 
   // Redirect if already logged in
-  getUser().then(u => { if(u) window.location.href='index.html'; });
-  renderUserNav();
+  _supa.auth.getUser().then(({ data }) => {
+    if (data?.user) window.location.href = 'index.html';
+  });
 </script>
 </body>
 </html>
