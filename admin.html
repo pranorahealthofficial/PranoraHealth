@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — PranoraHealth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700&family=Yatra+One&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<nav id="navbar" style="position:sticky;top:0;z-index:200;">
+  <a href="index.html" class="nav-logo">
+    <img src="1760520800681.png" alt="PranoraHealth" class="logo-img"/>
+    <div class="logo-text"><span class="logo-main">Pranora<span>Health</span></span><span class="logo-sub">Admin Panel</span></div>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-user-btn">🌿 View Site</a>
+    <button class="nav-user-btn" onclick="signOut()">Logout</button>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="#" class="active" onclick="showPanel('dashboard',this)">📊 Dashboard</a></li>
+      <li><a href="#" onclick="showPanel('products',this)">🛒 Products</a></li>
+      <li><a href="#" onclick="showPanel('addProduct',this)">➕ Add Product</a></li>
+      <li><a href="#" onclick="showPanel('posts',this)">📝 Blog Posts</a></li>
+      <li><a href="#" onclick="showPanel('addPost',this)">✏️ Add Post</a></li>
+      <li><a href="#" onclick="showPanel('orders',this)">📦 Orders</a></li>
+      <li><a href="#" onclick="showPanel('users',this)">👥 Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div class="admin-panel active" id="panel-dashboard">
+      <div class="page-title">📊 Dashboard</div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="table-wrap">
+        <div class="table-header"><h3>Recent Orders</h3></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS LIST -->
+    <div class="admin-panel" id="panel-products">
+      <div class="page-title">🛒 All Products</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Products</h3>
+          <input type="text" placeholder="Search..." oninput="filterTable('prodTable',this.value)" style="padding:.4rem .8rem;border:1px solid var(--cream-dark);border-radius:6px;font-size:.82rem;width:180px;"/>
+        </div>
+        <div style="overflow-x:auto;"><table id="prodTable"><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+        <tbody id="prodBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ADD/EDIT PRODUCT -->
+    <div class="admin-panel" id="panel-addProduct">
+      <div class="page-title" id="prodFormTitle">➕ Add Product</div>
+      <div class="form-card">
+        <input type="hidden" id="prodId"/>
+        <div class="form-2col">
+          <div class="form-group"><label>Product Name (English)*</label><input type="text" id="prodName" placeholder="e.g. Ashwagandha Gold"/></div>
+          <div class="form-group"><label>Product Name (Hindi)</label><input type="text" id="prodNameHi" placeholder="e.g. अश्वगंधा गोल्ड"/></div>
+        </div>
+        <div class="form-2col">
+          <div class="form-group"><label>Category*</label>
+            <select id="prodCat">
+              <option value="Herbs">Herbs</option><option value="Cosmetics">Cosmetics</option>
+              <option value="Supplements">Supplements</option><option value="Skin Care">Skin Care</option>
+              <option value="Hair Care">Hair Care</option><option value="Herbal Tea">Herbal Tea</option>
+              <option value="Wellness">Wellness</option><option value="Women Care">Women Care</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Badge (optional)</label>
+            <select id="prodBadge"><option value="">None</option><option value="BESTSELLER">BESTSELLER</option><option value="NEW">NEW</option><option value="SALE">SALE</option><option value="HOT">HOT</option></select>
+          </div>
+        </div>
+        <div class="form-2col">
+          <div class="form-group"><label>Price (₹)*</label><input type="number" id="prodPrice" placeholder="499"/></div>
+          <div class="form-group"><label>Original Price (₹)</label><input type="number" id="prodOrigPrice" placeholder="799"/></div>
+        </div>
+        <div class="form-2col">
+          <div class="form-group"><label>Stock Quantity</label><input type="number" id="prodStock" placeholder="100"/></div>
+          <div class="form-group"><label>Featured?</label>
+            <select id="prodFeatured"><option value="false">No</option><option value="true">Yes</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Image URL</label><input type="url" id="prodImg" placeholder="https://..." oninput="previewImg(this.value)"/></div>
+        <div id="imgPreview" style="margin-bottom:1rem;"></div>
+        <div class="form-group"><label>Description*</label><textarea id="prodDesc" placeholder="Product description..."></textarea></div>
+        <div style="display:flex;gap:1rem;">
+          <button class="btn-gold" onclick="submitProduct()">💾 Save Product</button>
+          <button class="btn-green" onclick="showPanel('products',null)">Cancel</button>
+        </div>
+        <div class="error-box" id="prodErr" style="margin-top:.7rem;"></div>
+        <div class="success-box" id="prodOk" style="margin-top:.7rem;"></div>
+      </div>
+    </div>
+
+    <!-- BLOG POSTS -->
+    <div class="admin-panel" id="panel-posts">
+      <div class="page-title">📝 All Blog Posts</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Posts</h3>
+          <input type="text" placeholder="Search..." oninput="filterTable('postsTable',this.value)" style="padding:.4rem .8rem;border:1px solid var(--cream-dark);border-radius:6px;font-size:.82rem;width:180px;"/>
+        </div>
+        <div style="overflow-x:auto;"><table id="postsTable"><thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="postsBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ADD/EDIT POST -->
+    <div class="admin-panel" id="panel-addPost">
+      <div class="page-title" id="postFormTitle">✏️ Add Blog Post</div>
+      <div class="form-card">
+        <input type="hidden" id="postId"/>
+        <div class="form-2col">
+          <div class="form-group"><label>Title (English)*</label><input type="text" id="postTitle" placeholder="Post title..."/></div>
+          <div class="form-group"><label>Title (Hindi)</label><input type="text" id="postTitleHi" placeholder="पोस्ट शीर्षक..."/></div>
+        </div>
+        <div class="form-2col">
+          <div class="form-group"><label>Category*</label>
+            <select id="postCat">
+              <option value="Herbs">Herbs</option><option value="Skin Care">Skin Care</option>
+              <option value="Hair Care">Hair Care</option><option value="Wellness">Wellness</option>
+              <option value="Remedies">Remedies</option><option value="Supplements">Supplements</option>
+              <option value="Women Care">Women Care</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Author Name</label><input type="text" id="postAuthor" placeholder="Dr. / Your name"/></div>
+        </div>
+        <div class="form-group"><label>Featured Image URL</label><input type="url" id="postImg" placeholder="https://..." oninput="previewImg2(this.value)"/></div>
+        <div id="imgPreview2" style="margin-bottom:1rem;"></div>
+        <div class="form-group"><label>Excerpt (Short Summary)*</label><textarea id="postExcerpt" placeholder="Short description for preview..." style="min-height:70px;"></textarea></div>
+        <div class="form-group"><label>Full Content (HTML allowed)*</label>
+          <div style="background:var(--cream-dark);border-radius:8px;padding:.5rem;margin-bottom:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+            <button type="button" onclick="insertTag('<h2>','</h2>')" class="btn-edit">H2</button>
+            <button type="button" onclick="insertTag('<p>','</p>')" class="btn-edit">P</button>
+            <button type="button" onclick="insertTag('<strong>','</strong>')" class="btn-edit"><b>B</b></button>
+            <button type="button" onclick="insertTag('<em>','</em>')" class="btn-edit"><i>I</i></button>
+            <button type="button" onclick="insertTag('<ul>\n<li>','</li>\n</ul>')" class="btn-edit">List</button>
+            <button type="button" onclick="insertTag('<blockquote>','</blockquote>')" class="btn-edit">Quote</button>
+          </div>
+          <textarea id="postContent" placeholder="Full article content... (HTML supported)" style="min-height:300px;font-family:monospace;font-size:.82rem;"></textarea>
+        </div>
+        <div class="form-2col">
+          <div class="form-group"><label>Published?</label>
+            <select id="postPublished"><option value="true">Yes - Public</option><option value="false">No - Draft</option></select>
+          </div>
+          <div class="form-group"><label>Featured Post?</label>
+            <select id="postFeatured"><option value="false">No</option><option value="true">Yes</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;">
+          <button class="btn-gold" onclick="submitPost()">💾 Save Post</button>
+          <button class="btn-green" onclick="showPanel('posts',null)">Cancel</button>
+        </div>
+        <div class="error-box" id="postErr" style="margin-top:.7rem;"></div>
+        <div class="success-box" id="postOk" style="margin-top:.7rem;"></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="admin-panel" id="panel-orders">
+      <div class="page-title">📦 Orders</div>
+      <div class="table-wrap">
+        <div class="table-header"><h3>All Orders</h3></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead>
+        <tbody id="ordersBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="admin-panel" id="panel-users">
+      <div class="page-title">👥 Users</div>
+      <div class="table-wrap">
+        <div class="table-header"><h3>All Users</h3></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
+        <tbody id="usersBody"></tbody></table></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+<script>
+// AUTH GUARD
+async function adminGuard() {
+  const user = await getUser();
+  if (!user) { window.location.href='login.html'; return false; }
+  const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  if (data?.role !== 'admin') { alert('Admin access only!'); window.location.href='index.html'; return false; }
+  return true;
+}
+
+function showPanel(name, linkEl) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (linkEl) linkEl.classList.add('active');
+  // Load data
+  if (name==='dashboard') loadDashboard();
+  if (name==='products') loadProducts();
+  if (name==='posts') loadPosts();
+  if (name==='orders') loadOrders();
+  if (name==='users') loadUsers();
+  if (name==='addProduct') { clearProductForm(); }
+  if (name==='addPost') { clearPostForm(); }
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  const [prods, posts, orders, users] = await Promise.all([
+    supabase.from('products').select('id',{count:'exact'}),
+    supabase.from('posts').select('id',{count:'exact'}),
+    supabase.from('orders').select('*').order('created_at',{ascending:false}).limit(10),
+    supabase.from('profiles').select('id',{count:'exact'})
+  ]);
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="snum">${prods.count||0}</div><div class="slbl">Products</div></div>
+    <div class="stat-card"><div class="snum">${posts.count||0}</div><div class="slbl">Blog Posts</div></div>
+    <div class="stat-card"><div class="snum">${orders.data?.length||0}</div><div class="slbl">Recent Orders</div></div>
+    <div class="stat-card"><div class="snum">${users.count||0}</div><div class="slbl">Users</div></div>`;
+  const tbody = document.getElementById('recentOrders');
+  if (!orders.data?.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:#888;">No orders yet</td></tr>'; return; }
+  tbody.innerHTML = orders.data.map(o => `
+    <tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>₹${o.total||0}</td>
+    <td><span class="badge badge-${o.status==='delivered'?'delivered':'pending'}">${o.status}</span></td>
+    <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
+    <td><button class="btn-edit" onclick="updateOrderStatus(${o.id},'delivered')">Mark Delivered</button></td></tr>`).join('');
+}
+
+// PRODUCTS
+async function loadProducts() {
+  const { data } = await supabase.from('products').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('prodBody');
+  if (!data?.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:#888;">No products yet. Add first product!</td></tr>'; return; }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><img src="${p.image||'https://images.unsplash.com/photo-1611021061285-c3f6e3f5e8d2?w=80'}" alt=""/></td>
+      <td><strong>${p.name}</strong><br/><small style="color:#888;">${p.name_hindi||''}</small></td>
+      <td>${p.category}</td><td>₹${p.price}</td><td>${p.stock||0}</td>
+      <td><div class="action-btns">
+        <button class="btn-edit" onclick="editProduct(${p.id})">Edit</button>
+        <button class="btn-del" onclick="delProduct(${p.id})">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function clearProductForm() {
+  ['prodId','prodName','prodNameHi','prodPrice','prodOrigPrice','prodStock','prodImg','prodDesc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('prodBadge').value='';
+  document.getElementById('prodCat').value='Herbs';
+  document.getElementById('prodFeatured').value='false';
+  document.getElementById('imgPreview').innerHTML='';
+  document.getElementById('prodFormTitle').textContent='➕ Add Product';
+  document.getElementById('prodErr').classList.remove('show');
+  document.getElementById('prodOk').classList.remove('show');
+}
+
+async function editProduct(id) {
+  const { data: p } = await supabase.from('products').select('*').eq('id',id).single();
+  if(!p) return;
+  document.getElementById('prodId').value=p.id;
+  document.getElementById('prodName').value=p.name||'';
+  document.getElementById('prodNameHi').value=p.name_hindi||'';
+  document.getElementById('prodPrice').value=p.price||'';
+  document.getElementById('prodOrigPrice').value=p.original_price||'';
+  document.getElementById('prodStock').value=p.stock||'';
+  document.getElementById('prodImg').value=p.image||'';
+  document.getElementById('prodDesc').value=p.description||'';
+  document.getElementById('prodCat').value=p.category||'Herbs';
+  document.getElementById('prodBadge').value=p.badge||'';
+  document.getElementById('prodFeatured').value=String(p.featured||false);
+  if(p.image) document.getElementById('imgPreview').innerHTML=`<img src="${p.image}" style="width:80px;border-radius:8px;"/>`;
+  document.getElementById('prodFormTitle').textContent='✏️ Edit Product';
+  showPanel('addProduct',null);
+}
+
+async function delProduct(id) {
+  if(!confirm('Delete this product?')) return;
+  await deleteProduct(id);
+  showToast('🗑️ Product deleted!');
+  loadProducts();
+}
+
+async function submitProduct() {
+  const err = document.getElementById('prodErr');
+  const ok = document.getElementById('prodOk');
+  err.classList.remove('show'); ok.classList.remove('show');
+  const name = document.getElementById('prodName').value.trim();
+  const price = document.getElementById('prodPrice').value;
+  if(!name || !price) { err.textContent='Name and Price are required!'; err.classList.add('show'); return; }
+  const product = {
+    name, price: parseInt(price),
+    name_hindi: document.getElementById('prodNameHi').value,
+    original_price: parseInt(document.getElementById('prodOrigPrice').value)||null,
+    stock: parseInt(document.getElementById('prodStock').value)||0,
+    category: document.getElementById('prodCat').value,
+    badge: document.getElementById('prodBadge').value,
+    image: document.getElementById('prodImg').value,
+    description: document.getElementById('prodDesc').value,
+    featured: document.getElementById('prodFeatured').value==='true',
+  };
+  const id = document.getElementById('prodId').value;
+  if(id) product.id = parseInt(id);
+  try {
+    await saveProduct(product);
+    ok.textContent='✅ Product saved!'; ok.classList.add('show');
+    setTimeout(()=>showPanel('products',null),1200);
+  } catch(e) { err.textContent='❌ Error: '+e.message; err.classList.add('show'); }
+}
+
+function previewImg(url) {
+  const el = document.getElementById('imgPreview');
+  el.innerHTML = url ? `<img src="${url}" style="width:80px;border-radius:8px;" onerror="this.style.display='none'"/>` : '';
+}
+function previewImg2(url) {
+  const el = document.getElementById('imgPreview2');
+  el.innerHTML = url ? `<img src="${url}" style="width:80px;border-radius:8px;" onerror="this.style.display='none'"/>` : '';
+}
+
+// POSTS
+async function loadPosts() {
+  const { data } = await supabase.from('posts').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('postsBody');
+  if(!data?.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">No posts yet. Write first post!</td></tr>'; return; }
+  tbody.innerHTML = data.map(p=>`
+    <tr>
+      <td><strong>${p.title}</strong><br/><small style="color:#888;">${p.title_hindi||''}</small></td>
+      <td>${p.category}</td><td>${p.views||0}</td>
+      <td>${new Date(p.created_at).toLocaleDateString('en-IN')}</td>
+      <td><div class="action-btns">
+        <button class="btn-edit" onclick="editPost(${p.id})">Edit</button>
+        <button class="btn-del" onclick="delPost(${p.id})">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function clearPostForm() {
+  ['postId','postTitle','postTitleHi','postAuthor','postImg','postExcerpt','postContent'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('postCat').value='Herbs';
+  document.getElementById('postPublished').value='true';
+  document.getElementById('postFeatured').value='false';
+  document.getElementById('imgPreview2').innerHTML='';
+  document.getElementById('postFormTitle').textContent='✏️ Add Blog Post';
+  document.getElementById('postErr').classList.remove('show');
+  document.getElementById('postOk').classList.remove('show');
+}
+
+async function editPost(id) {
+  const { data: p } = await supabase.from('posts').select('*').eq('id',id).single();
+  if(!p) return;
+  document.getElementById('postId').value=p.id;
+  document.getElementById('postTitle').value=p.title||'';
+  document.getElementById('postTitleHi').value=p.title_hindi||'';
+  document.getElementById('postAuthor').value=p.author||'';
+  document.getElementById('postImg').value=p.image||'';
+  document.getElementById('postExcerpt').value=p.excerpt||'';
+  document.getElementById('postContent').value=p.content||'';
+  document.getElementById('postCat').value=p.category||'Herbs';
+  document.getElementById('postPublished').value=String(p.published!==false);
+  document.getElementById('postFeatured').value=String(p.featured||false);
+  if(p.image) document.getElementById('imgPreview2').innerHTML=`<img src="${p.image}" style="width:80px;border-radius:8px;"/>`;
+  document.getElementById('postFormTitle').textContent='✏️ Edit Post';
+  showPanel('addPost',null);
+}
+
+async function delPost(id) {
+  if(!confirm('Delete this post?')) return;
+  await deletePost(id);
+  showToast('🗑️ Post deleted!');
+  loadPosts();
+}
+
+async function submitPost() {
+  const err = document.getElementById('postErr');
+  const ok = document.getElementById('postOk');
+  err.classList.remove('show'); ok.classList.remove('show');
+  const title = document.getElementById('postTitle').value.trim();
+  const content = document.getElementById('postContent').value.trim();
+  const excerpt = document.getElementById('postExcerpt').value.trim();
+  if(!title || !content || !excerpt) { err.textContent='Title, Excerpt and Content are required!'; err.classList.add('show'); return; }
+  const post = {
+    title, content, excerpt,
+    title_hindi: document.getElementById('postTitleHi').value,
+    author: document.getElementById('postAuthor').value,
+    image: document.getElementById('postImg').value,
+    category: document.getElementById('postCat').value,
+    published: document.getElementById('postPublished').value==='true',
+    featured: document.getElementById('postFeatured').value==='true',
+  };
+  const id = document.getElementById('postId').value;
+  if(id) post.id = parseInt(id);
+  try {
+    await savePost(post);
+    ok.textContent='✅ Post saved!'; ok.classList.add('show');
+    setTimeout(()=>showPanel('posts',null),1200);
+  } catch(e) { err.textContent='❌ Error: '+e.message; err.classList.add('show'); }
+}
+
+function insertTag(open,close) {
+  const ta = document.getElementById('postContent');
+  const s=ta.selectionStart, e=ta.selectionEnd;
+  const sel = ta.value.substring(s,e);
+  ta.value = ta.value.substring(0,s)+open+sel+close+ta.value.substring(e);
+  ta.focus(); ta.selectionStart=s+open.length; ta.selectionEnd=s+open.length+sel.length;
+}
+
+// ORDERS
+async function loadOrders() {
+  const orders = await getOrders();
+  const tbody = document.getElementById('ordersBody');
+  if(!orders.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:#888;">No orders yet</td></tr>'; return; }
+  tbody.innerHTML = orders.map(o=>`
+    <tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>${o.user_phone||'-'}</td>
+    <td>₹${o.total||0}</td>
+    <td><span class="badge badge-${o.status==='delivered'?'delivered':'pending'}">${o.status}</span></td>
+    <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
+    <td><select onchange="updateOrderStatus(${o.id},this.value)" style="padding:.25rem;border-radius:5px;font-size:.78rem;">
+      <option ${o.status==='pending'?'selected':''} value="pending">Pending</option>
+      <option ${o.status==='processing'?'selected':''} value="processing">Processing</option>
+      <option ${o.status==='shipped'?'selected':''} value="shipped">Shipped</option>
+      <option ${o.status==='delivered'?'selected':''} value="delivered">Delivered</option>
+    </select></td></tr>`).join('');
+}
+
+// USERS
+async function loadUsers() {
+  const { data } = await supabase.from('profiles').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('usersBody');
+  if(!data?.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">No users yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(u=>`
+    <tr><td>${u.name||'-'}</td><td>${u.email||'-'}</td>
+    <td><span class="badge badge-${u.role==='admin'?'admin':'user'}">${u.role||'user'}</span></td>
+    <td>${u.created_at?new Date(u.created_at).toLocaleDateString('en-IN'):'-'}</td>
+    <td>${u.role!=='admin'?`<button class="btn-edit" onclick="makeAdmin('${u.id}')">Make Admin</button>`:'<span style="color:var(--gold-dark);font-size:.78rem;">Owner</span>'}</td>
+    </tr>`).join('');
+}
+
+async function makeAdmin(id) {
+  if(!confirm('Make this user admin?')) return;
+  await supabase.from('profiles').update({role:'admin'}).eq('id',id);
+  showToast('✅ User is now admin!');
+  loadUsers();
+}
+
+// TABLE SEARCH
+function filterTable(tableId, q) {
+  const rows = document.querySelectorAll('#'+tableId+' tbody tr');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+
+// INIT
+adminGuard().then(ok => { if(ok) { loadDashboard(); } });
+</script>
+</body>
+</html>
