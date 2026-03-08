@@ -228,16 +228,26 @@ async function doLogin(){
     errBox.style.display='block';
     return;
   }
-  sessionStorage.setItem('ph_admin','yes');
+  localStorage.setItem('ph_admin','yes');
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('adminWrap').style.display='block';
   loadDashboard();
 }
 
-function doLogout(){sessionStorage.removeItem('ph_admin');location.reload();}
+function doLogout(){
+  const p=document.getElementById('logoutPopup');
+  p.style.display='flex';
+}
+function cancelLogout(){
+  document.getElementById('logoutPopup').style.display='none';
+}
+function confirmLogout(){
+  localStorage.removeItem('ph_admin');
+  location.reload();
+}
 
 // Auto login if session exists
-if(sessionStorage.getItem('ph_admin')==='yes'){
+if(localStorage.getItem('ph_admin')==='yes'){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('adminWrap').style.display='block';
 }
@@ -245,8 +255,11 @@ if(sessionStorage.getItem('ph_admin')==='yes'){
 function showPanel(name,el){
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav a').forEach(a=>a.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(el)el.classList.add('active');
+  // Also highlight bottom nav
+  document.querySelectorAll('.bottom-nav a').forEach(a=>{if(a.getAttribute('onclick')&&a.getAttribute('onclick').includes("'"+name+"'"))a.classList.add('active');});
   if(name==='dashboard')loadDashboard();
   if(name==='products')loadProds();
   if(name==='posts')loadPosts();
@@ -333,95 +346,4 @@ async function saveProd(){
     else await _db.from('products').insert(p);
     msg.style.color='green';msg.textContent='✅ Saved!';
     setTimeout(()=>showPanel('products',null),900);
-  }catch(e){msg.style.color='red';msg.textContent='❌ '+e.message;}
-}
-
-async function loadPosts(){
-  const {data}=await _db.from('posts').select('*').order('created_at',{ascending:false});
-  const tb=document.getElementById('postsBody');
-  if(!data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">Koi post nahi. Add Post se likho!</td></tr>';return;}
-  tb.innerHTML=data.map(p=>`<tr>
-    <td><strong>${p.title}</strong>${p.title_hindi?`<br/><small>${p.title_hindi}</small>`:''}</td>
-    <td>${p.category}</td><td>${p.views||0}</td>
-    <td>${new Date(p.created_at).toLocaleDateString('en-IN')}</td>
-    <td><div class="action-btns">
-      <button class="btn-edit" onclick="editPost(${p.id})">✏️</button>
-      <button class="btn-del" onclick="delPost(${p.id})">🗑️</button>
-    </div></td></tr>`).join('');
-}
-
-async function editPost(id){
-  const {data:p}=await _db.from('posts').select('*').eq('id',id).single();
-  if(!p)return;
-  document.getElementById('postId').value=p.id;
-  document.getElementById('ptTitle').value=p.title||'';
-  document.getElementById('ptTitleHi').value=p.title_hindi||'';
-  document.getElementById('ptAuthor').value=p.author||'';
-  document.getElementById('ptImg').value=p.image||'';
-  document.getElementById('ptExcerpt').value=p.excerpt||'';
-  document.getElementById('ptContent').value=p.content||'';
-  document.getElementById('ptCat').value=p.category||'Herbs';
-  document.getElementById('ptPub').value=String(p.published!==false);
-  document.getElementById('ptFeat').value=String(p.featured||false);
-  if(p.image)showPrev('ptPrev',p.image);
-  document.getElementById('postTitle').textContent='✏️ Edit Post';
-  showPanel('addPost',null);
-}
-
-async function delPost(id){
-  if(!confirm('Delete karein?'))return;
-  await _db.from('posts').delete().eq('id',id);
-  toast('🗑️ Deleted!');loadPosts();
-}
-
-async function savePost(){
-  const title=document.getElementById('ptTitle').value.trim();
-  const content=document.getElementById('ptContent').value.trim();
-  const excerpt=document.getElementById('ptExcerpt').value.trim();
-  const msg=document.getElementById('ptMsg');
-  if(!title||!content||!excerpt){msg.style.color='red';msg.textContent='❌ Title, Excerpt & Content zaroori!';return;}
-  const p={title,content,excerpt,
-    title_hindi:document.getElementById('ptTitleHi').value,
-    author:document.getElementById('ptAuthor').value,
-    image:document.getElementById('ptImg').value,
-    category:document.getElementById('ptCat').value,
-    published:document.getElementById('ptPub').value==='true',
-    featured:document.getElementById('ptFeat').value==='true'};
-  const id=document.getElementById('postId').value;
-  try{
-    if(id)await _db.from('posts').update(p).eq('id',parseInt(id));
-    else await _db.from('posts').insert(p);
-    msg.style.color='green';msg.textContent='✅ Saved!';
-    setTimeout(()=>showPanel('posts',null),900);
-  }catch(e){msg.style.color='red';msg.textContent='❌ '+e.message;}
-}
-
-function ins(o,c){const t=document.getElementById('ptContent');const s=t.selectionStart,e=t.selectionEnd;t.value=t.value.substring(0,s)+o+t.value.substring(s,e)+c+t.value.substring(e);}
-
-async function loadOrders(){
-  const {data}=await _db.from('orders').select('*').order('created_at',{ascending:false});
-  const tb=document.getElementById('ordersBody');
-  if(!data?.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:#888;">Koi order nahi abhi</td></tr>';return;}
-  tb.innerHTML=data.map(o=>`<tr><td>#${o.id}</td><td>${o.user_name||'-'}</td><td>${o.user_phone||'-'}</td>
-    <td>₹${o.total||0}</td><td>${o.status||'pending'}</td>
-    <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
-    <td><select onchange="updOrd(${o.id},this.value)" style="padding:.25rem;border-radius:4px;font-size:.75rem;">
-      <option ${o.status==='pending'?'selected':''} value="pending">Pending</option>
-      <option ${o.status==='shipped'?'selected':''} value="shipped">Shipped</option>
-      <option ${o.status==='delivered'?'selected':''} value="delivered">Delivered</option>
-    </select></td></tr>`).join('');
-}
-async function updOrd(id,s){await _db.from('orders').update({status:s}).eq('id',id);toast('✅ Updated!');}
-
-async function loadUsers(){
-  const {data}=await _db.from('profiles').select('*').order('created_at',{ascending:false});
-  const tb=document.getElementById('usersBody');
-  if(!data?.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#888;">Koi user nahi</td></tr>';return;}
-  tb.innerHTML=data.map(u=>`<tr><td>${u.name||'-'}</td><td>${u.email||'-'}</td>
-    <td><span class="badge badge-${u.role==='admin'?'admin':'user'}">${u.role||'user'}</span></td>
-    <td>${u.role!=='admin'?`<button class="btn-edit" onclick="mkAdmin('${u.id}')">Make Admin</button>`:'✓ Admin'}</td></tr>`).join('');
-}
-async function mkAdmin(id){if(!confirm('Admin banayein?'))return;await _db.from('profiles').update({role:'admin'}).eq('id',id);toast('✅ Done!');loadUsers();}
-</script>
-</body>
-</html>
+  }catch(e){msg
