@@ -4,10 +4,19 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login — PranoraHealth</title>
+  <link rel="icon" href="1760520800681.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700&family=Yatra+One&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const _db = supabase.createClient(
+      'https://atdhhsqommyfdoajrcwu.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA'
+    );
+  </script>
 </head>
 <body>
+
 <nav id="navbar">
   <a href="index.html" class="nav-logo">
     <img src="1760520800681.png" alt="PranoraHealth" class="logo-img"/>
@@ -22,9 +31,9 @@
     <a href="blog.html">Blog</a>
   </div>
   <div class="nav-right">
-    <a href="login.html" class="nav-login-btn">Login / Register</a>
+    <a href="cart.html" class="cart-btn">🛒 <span id="cartCount">0</span></a>
   </div>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -32,141 +41,274 @@
   <a href="index.html">🏠 Home</a>
   <a href="shop.html">🛒 Shop</a>
   <a href="blog.html">📝 Blog</a>
-  <a href="#about">ℹ️ About</a>
-  <a href="#contact">📞 Contact</a>
-  <a href="login.html">👤 Login / Account</a>
   <a href="cart.html">🛒 Cart</a>
 </div>
+
+<div class="auth-wrap">
+  <div class="auth-box">
+
+    <div class="auth-logo">
+      <img src="1760520800681.png" alt="PranoraHealth" onerror="this.style.display='none'"/>
+      <h2>PranoraHealth</h2>
+      <p style="font-family:'Yatra One',serif;color:var(--gold-dark);font-size:.82rem;">प्राकृतिक स्वास्थ्य</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchMain('login')">Login</div>
+      <div class="auth-tab" onclick="switchMain('register')">Register</div>
+    </div>
+
+    <div class="error-box" id="errBox"></div>
+    <div class="success-box" id="sucBox"></div>
+
+    <!-- LOGIN -->
+    <div id="sec-login">
+      <div style="display:flex;gap:.5rem;margin-bottom:1.2rem;">
+        <button class="sub-tab active" id="st-pass" onclick="switchLogin('password')">🔑 Password</button>
+        <button class="sub-tab" id="st-otp" onclick="switchLogin('otp')">📱 OTP</button>
+      </div>
+
+      <div id="pane-password">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="lEmail" placeholder="aapka@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="lPass" placeholder="Password" onkeypress="if(event.key==='Enter')doLogin()"/>
+        </div>
+        <button class="btn-gold" style="width:100%;" onclick="doLogin()">Login →</button>
+        <p style="text-align:center;margin-top:.8rem;">
+          <a href="#" onclick="showForgot()" style="color:var(--gold-dark);font-size:.82rem;">🔐 Password bhool gaye?</a>
+        </p>
+      </div>
+
+      <div id="pane-otp" style="display:none;">
+        <div id="otp-step1">
+          <div class="form-group">
+            <label>Email — OTP bheja jayega</label>
+            <input type="email" id="otpEmail" placeholder="aapka@email.com"/>
+          </div>
+          <button class="btn-gold" style="width:100%;" onclick="sendOTP()">📨 OTP Bhejo</button>
+        </div>
+        <div id="otp-step2" style="display:none;">
+          <div style="text-align:center;margin-bottom:1rem;padding:.8rem;background:var(--cream-dark);border-radius:8px;">
+            <p style="font-size:.82rem;color:var(--text-mid);font-weight:700;">✅ OTP bheja gaya!</p>
+            <p style="font-size:.78rem;color:#888;" id="otpSentTo"></p>
+          </div>
+          <div class="form-group">
+            <label>6-digit OTP Enter Karein</label>
+            <input type="number" id="otpCode" placeholder="123456"
+              style="letter-spacing:.3em;font-size:1.3rem;text-align:center;font-weight:700;"
+              onkeypress="if(event.key==='Enter')verifyOTP()"/>
+          </div>
+          <button class="btn-gold" style="width:100%;margin-bottom:.6rem;" onclick="verifyOTP()">✅ Verify & Login</button>
+          <button class="btn-green" style="width:100%;font-size:.82rem;padding:.5rem;" onclick="backToOTPStep1()">← Wapas Jao</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="sec-register" style="display:none;">
+      <div class="form-group">
+        <label>Aapka Naam *</label>
+        <input type="text" id="rName" placeholder="Poora naam"/>
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="rEmail" placeholder="aapka@email.com"/>
+      </div>
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="rPass" placeholder="Minimum 6 characters"/>
+      </div>
+      <div class="form-group">
+        <label>Phone (Optional)</label>
+        <input type="tel" id="rPhone" placeholder="+91 XXXXXXXXXX"/>
+      </div>
+      <button class="btn-gold" style="width:100%;" id="regBtn" onclick="doRegister()">Account Banao 🌿</button>
+
+      <div id="reg-otp-box" style="display:none;margin-top:1.2rem;">
+        <div style="text-align:center;padding:1rem;background:var(--cream-dark);border-radius:10px;margin-bottom:1rem;">
+          <div style="font-size:2rem;">📧</div>
+          <p style="font-size:.85rem;color:var(--text-mid);font-weight:700;">OTP bheja gaya!</p>
+          <p style="font-size:.78rem;color:#888;" id="regOtpSentTo"></p>
+        </div>
+        <div class="form-group">
+          <label>6-digit OTP Enter Karein</label>
+          <input type="number" id="regOtpCode" placeholder="123456"
+            style="letter-spacing:.3em;font-size:1.3rem;text-align:center;font-weight:700;"
+            onkeypress="if(event.key==='Enter')verifyRegOTP()"/>
+        </div>
+        <button class="btn-gold" style="width:100%;margin-bottom:.6rem;" onclick="verifyRegOTP()">✅ Verify Karein</button>
+        <button class="btn-green" style="width:100%;font-size:.82rem;padding:.5rem;" onclick="resendOTP()">🔄 OTP Dobara Bhejo</button>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="sec-forgot" style="display:none;">
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:2.5rem;">🔐</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;color:var(--green);">Password Reset</h3>
+        <p style="font-size:.8rem;color:#888;">Email par reset link bheja jayega</p>
+      </div>
+      <div class="form-group">
+        <label>Aapka Email</label>
+        <input type="email" id="fEmail" placeholder="aapka@email.com"/>
+      </div>
+      <button class="btn-gold" style="width:100%;margin-bottom:.6rem;" onclick="doForgot()">📨 Reset Link Bhejo</button>
+      <button class="btn-green" style="width:100%;font-size:.82rem;padding:.5rem;" onclick="switchMain('login')">← Login par wapas jao</button>
+    </div>
+
+    <div class="hint-box">
+      🛒 Login karne ke baad aap orders track kar sakte hain!
+    </div>
+  </div>
+</div>
+
+<style>
+.sub-tab{flex:1;padding:.5rem;border-radius:7px;border:2px solid var(--cream-dark);
+  background:var(--cream-dark);color:var(--text-mid);font-weight:700;font-size:.82rem;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.sub-tab.active{background:var(--green);color:var(--gold);border-color:var(--green);}
+</style>
+
 <script>
 function toggleMenu(){
   document.getElementById('hamburger').classList.toggle('open');
   document.getElementById('mobileMenu').classList.toggle('open');
 }
-</script>
+try{
+  const c=JSON.parse(localStorage.getItem('ph_cart')||'[]');
+  document.getElementById('cartCount').textContent=c.reduce((s,i)=>s+i.qty,0);
+}catch{}
 
-<div class="auth-wrap">
-  <div class="auth-box">
-    <div class="auth-logo">
-      <img src="1760520800681.png" alt="PranoraHealth"/>
-      <h2>Welcome to PranoraHealth</h2>
-      <p style="font-size:.82rem;color:#888;">Natural Health & Wellness</p>
-    </div>
+function showMsg(type,msg){
+  const e=document.getElementById('errBox'),s=document.getElementById('sucBox');
+  e.className='error-box';s.className='success-box';
+  if(type==='err'){e.textContent=msg;e.className='error-box show';}
+  else{s.textContent=msg;s.className='success-box show';}
+  setTimeout(()=>{e.className='error-box';s.className='success-box';},6000);
+}
 
-    <div class="auth-tabs">
-      <div class="auth-tab active" onclick="switchTab('login')">Login</div>
-      <div class="auth-tab" onclick="switchTab('register')">Register</div>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="tab-pane active" id="loginPane">
-      <div class="error-box" id="loginErr"></div>
-      <div class="success-box" id="loginOk"></div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="loginEmail" placeholder="your@email.com"/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="Enter password"/>
-      </div>
-      <button class="btn-gold" style="width:100%;margin-top:.5rem;" onclick="doLogin()">Login 🌿</button>
-      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#888;">
-        New user? <a href="#" onclick="switchTab('register')" style="color:var(--green);font-weight:700;">Create account</a>
-      </p>
-    </div>
-
-    <!-- REGISTER -->
-    <div class="tab-pane" id="registerPane">
-      <div class="error-box" id="regErr"></div>
-      <div class="success-box" id="regOk"></div>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="Aapka naam"/>
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="regEmail" placeholder="your@email.com"/>
-      </div>
-      <div class="form-group">
-        <label>Password (min 6 characters)</label>
-        <input type="password" id="regPass" placeholder="Strong password"/>
-      </div>
-      <button class="btn-gold" style="width:100%;margin-top:.5rem;" onclick="doRegister()">Create Account 🌿</button>
-      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#888;">
-        Already have account? <a href="#" onclick="switchTab('login')" style="color:var(--green);font-weight:700;">Login</a>
-      </p>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- Supabase FIRST, then app.js -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script>
-  // Supabase setup directly here
-  const SUPA_URL = 'https://atdhhsqommyfdoajrcwu.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhoc3FvbW15ZmRvYWpyY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NjIxNDEsImV4cCI6MjA4ODQzODE0MX0.nhjV714NGOWSf2_09rc47a-VquKCw93q6k_WIKz4ODA';
-  const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-  function switchTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach((t,i) => {
-      t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
-    });
-    document.getElementById('loginPane').classList.toggle('active', tab==='login');
-    document.getElementById('registerPane').classList.toggle('active', tab==='register');
-  }
-
-  function showMsg(id, msg, type) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.className = (type==='ok' ? 'success-box' : 'error-box') + ' show';
-  }
-
-  async function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass  = document.getElementById('loginPass').value;
-    if (!email || !pass) { showMsg('loginErr','Please fill all fields!','err'); return; }
-    document.getElementById('loginErr').className='error-box';
-    document.getElementById('loginOk').className='success-box';
-    try {
-      const { data, error } = await _supa.auth.signInWithPassword({ email, password: pass });
-      if (error) throw error;
-      // Check role
-      const { data: profile } = await _supa.from('profiles').select('role').eq('id', data.user.id).single();
-      showMsg('loginOk', '✅ Login successful! Redirecting...', 'ok');
-      setTimeout(() => {
-        window.location.href = profile?.role === 'admin' ? 'admin.html' : 'index.html';
-      }, 1200);
-    } catch(e) {
-      showMsg('loginErr', '❌ ' + (e.message || 'Login failed!'), 'err');
-    }
-  }
-
-  async function doRegister() {
-    const name  = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const pass  = document.getElementById('regPass').value;
-    if (!name||!email||!pass) { showMsg('regErr','Please fill all fields!','err'); return; }
-    if (pass.length < 6)      { showMsg('regErr','Password must be 6+ characters','err'); return; }
-    document.getElementById('regErr').className='error-box';
-    document.getElementById('regOk').className='success-box';
-    try {
-      const { data, error } = await _supa.auth.signUp({ email, password: pass, options:{ data:{ name } } });
-      if (error) throw error;
-      if (data.user) {
-        await _supa.from('profiles').upsert({ id: data.user.id, name, email, role: 'user' });
-      }
-      showMsg('regOk', '✅ Account created! Check email to confirm.', 'ok');
-    } catch(e) {
-      showMsg('regErr', '❌ ' + (e.message || 'Registration failed!'), 'err');
-    }
-  }
-
-  // Redirect if already logged in
-  _supa.auth.getUser().then(({ data }) => {
-    if (data?.user) window.location.href = 'index.html';
+function switchMain(sec){
+  document.getElementById('sec-login').style.display=sec==='login'?'block':'none';
+  document.getElementById('sec-register').style.display=sec==='register'?'block':'none';
+  document.getElementById('sec-forgot').style.display='none';
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>{
+    t.classList.toggle('active',(sec==='login'&&i===0)||(sec==='register'&&i===1));
   });
+}
+
+function switchLogin(type){
+  document.getElementById('pane-password').style.display=type==='password'?'block':'none';
+  document.getElementById('pane-otp').style.display=type==='otp'?'block':'none';
+  document.getElementById('st-pass').classList.toggle('active',type==='password');
+  document.getElementById('st-otp').classList.toggle('active',type==='otp');
+}
+
+function showForgot(){
+  document.getElementById('sec-login').style.display='none';
+  document.getElementById('sec-forgot').style.display='block';
+}
+
+async function doLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!email||!pass){showMsg('err','❌ Email aur password daalo!');return;}
+  try{
+    const {error}=await _db.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    showMsg('ok','✅ Login ho gaya!');
+    setTimeout(()=>location.href='index.html',1200);
+  }catch(e){showMsg('err','❌ Email ya password galat hai!');}
+}
+
+async function sendOTP(){
+  const email=document.getElementById('otpEmail').value.trim();
+  if(!email){showMsg('err','❌ Email daalo!');return;}
+  try{
+    const {error}=await _db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+    if(error)throw error;
+    document.getElementById('otpSentTo').textContent=email+' par OTP bheja gaya';
+    document.getElementById('otp-step1').style.display='none';
+    document.getElementById('otp-step2').style.display='block';
+    showMsg('ok','✅ OTP bheja gaya!');
+  }catch(e){showMsg('err','❌ Yeh email registered nahi hai! Pehle Register karein.');}
+}
+
+async function verifyOTP(){
+  const email=document.getElementById('otpEmail').value.trim();
+  const token=document.getElementById('otpCode').value.trim();
+  if(token.length!==6){showMsg('err','❌ 6-digit OTP daalo!');return;}
+  try{
+    const {error}=await _db.auth.verifyOtp({email,token,type:'email'});
+    if(error)throw error;
+    showMsg('ok','✅ Login ho gaya!');
+    setTimeout(()=>location.href='index.html',1200);
+  }catch(e){showMsg('err','❌ OTP galat hai ya expire ho gaya!');}
+}
+
+function backToOTPStep1(){
+  document.getElementById('otp-step1').style.display='block';
+  document.getElementById('otp-step2').style.display='none';
+  document.getElementById('otpCode').value='';
+}
+
+let pendingRegEmail='';
+async function doRegister(){
+  const name=document.getElementById('rName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const pass=document.getElementById('rPass').value;
+  if(!name||!email||!pass){showMsg('err','❌ Naam, email aur password zaroori!');return;}
+  if(pass.length<6){showMsg('err','❌ Password 6+ characters ka hona chahiye!');return;}
+  try{
+    const {data,error}=await _db.auth.signUp({email,password:pass,options:{data:{name}}});
+    if(error)throw error;
+    if(data.user){
+      await _db.from('profiles').upsert({id:data.user.id,name,email,phone:document.getElementById('rPhone').value||null,role:'user'});
+    }
+    pendingRegEmail=email;
+    document.getElementById('regOtpSentTo').textContent=email+' par OTP bheja gaya';
+    document.getElementById('reg-otp-box').style.display='block';
+    document.getElementById('regBtn').style.display='none';
+    showMsg('ok','✅ OTP bheja gaya! Email check karein.');
+  }catch(e){
+    if(e.message.includes('already'))showMsg('err','❌ Email already registered hai! Login karein.');
+    else showMsg('err','❌ '+e.message);
+  }
+}
+
+async function verifyRegOTP(){
+  const token=document.getElementById('regOtpCode').value.trim();
+  if(token.length!==6){showMsg('err','❌ 6-digit OTP daalo!');return;}
+  try{
+    const {error}=await _db.auth.verifyOtp({email:pendingRegEmail,token,type:'signup'});
+    if(error)throw error;
+    showMsg('ok','🎉 Account ban gaya! Login ho raha hai...');
+    setTimeout(()=>location.href='index.html',1500);
+  }catch(e){showMsg('err','❌ OTP galat ya expire! Dobara bhejo.');}
+}
+
+async function resendOTP(){
+  try{
+    await _db.auth.resend({type:'signup',email:pendingRegEmail});
+    showMsg('ok','✅ OTP dobara bheja gaya!');
+  }catch(e){showMsg('err','❌ '+e.message);}
+}
+
+async function doForgot(){
+  const email=document.getElementById('fEmail').value.trim();
+  if(!email){showMsg('err','❌ Email daalo!');return;}
+  try{
+    const {error}=await _db.auth.resetPasswordForEmail(email,{
+      redirectTo:'https://pranorahealthofficial.github.io/PranoraHealth/login.html'
+    });
+    if(error)throw error;
+    showMsg('ok','✅ Reset link bheja gaya! Email check karein.');
+  }catch(e){showMsg('err','❌ '+e.message);}
+}
 </script>
 </body>
-</html>
+  </html>
+  
