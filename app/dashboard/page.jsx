@@ -36,6 +36,7 @@ export default function DashboardPage() {
   }, [user, loading])
 
   async function handleSignOut() {
+    if (!confirm('Are you sure you want to logout?')) return
     await signOut()
     toast('Logged out successfully')
     router.push('/')
