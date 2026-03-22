@@ -96,7 +96,7 @@ export default async function ProductPage({ params }) {
           <div className="font-bold text-[#1B4D2E] text-lg">Order via WhatsApp</div>
           <div className="text-sm text-gray-500">Quick order or have questions? Chat with us directly!</div>
         </div>
-        <a href={`https://wa.me/919876543210?text=Hi! I want to order: ${encodeURIComponent(product.name)}`}
+        <a href={`https://wa.me/917489262622?text=Hi! I want to order: ${encodeURIComponent(product.name)}`}
           target="_blank" rel="noopener noreferrer"
           className="bg-green-500 text-white font-bold px-6 py-3 rounded-full hover:bg-green-600 transition-all text-sm whitespace-nowrap">
           💬 Order on WhatsApp
