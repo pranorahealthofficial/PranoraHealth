@@ -32,7 +32,7 @@ export default function Footer() {
             <div className="text-[11px] font-bold text-[#C9A84C] tracking-widest mb-3">CONTACT</div>
             <div className="space-y-2 text-sm text-white/60">
               <a href="mailto:pranorahealthofficial@gmail.com" className="flex items-center gap-2 hover:text-[#C9A84C]">📧 pranorahealthofficial@gmail.com</a>
-              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C9A84C]">💬 WhatsApp Order</a>
+              <a href="https://wa.me/917489262622" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C9A84C]">💬 WhatsApp Order</a>
               <a href="https://youtube.com/@pranorahealthofficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C9A84C]">📺 @pranorahealthofficial</a>
             </div>
             <div className="mt-3 text-[11px] text-white/40">📍 India · #pranorahealth · #prenorahealth</div>
