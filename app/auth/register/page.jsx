@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', confirm: '' })
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const { signUp } = useAuth()
   const router = useRouter()
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }))
@@ -59,13 +61,25 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="text-sm font-semibold text-[#1B4D2E] block mb-1">Password*</label>
-            <input type="password" value={form.password} onChange={e => set('password', e.target.value)}
-              placeholder="Min. 6 characters" className="input-field" required />
+            <div className="relative">
+              <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)}
+                placeholder="Min. 6 characters" className="input-field pr-12" required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1B4D2E] text-xl">
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-[#1B4D2E] block mb-1">Confirm Password*</label>
-            <input type="password" value={form.confirm} onChange={e => set('confirm', e.target.value)}
-              placeholder="Repeat password" className="input-field" required />
+            <div className="relative">
+              <input type={showConfirm ? 'text' : 'password'} value={form.confirm} onChange={e => set('confirm', e.target.value)}
+                placeholder="Repeat password" className="input-field pr-12" required />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1B4D2E] text-xl">
+                {showConfirm ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full py-3 text-base">
             {loading ? 'Creating Account...' : 'Create Account'}
