@@ -1,7 +1,5 @@
 'use client'
-export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ArticleCard from '@/components/ArticleCard'
 
@@ -12,13 +10,7 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
-  const searchParams = useSearchParams()
   const supabase = createClient()
-
-  useEffect(() => {
-    const cat = searchParams.get('category')
-    if (cat) setCategory(cat)
-  }, [searchParams])
 
   useEffect(() => {
     async function fetchArticles() {
