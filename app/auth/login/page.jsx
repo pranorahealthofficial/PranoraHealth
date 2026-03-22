@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { signIn } = useAuth()
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -39,8 +40,14 @@ export default function LoginPage() {
           </div>
           <div>
             <label className="text-sm font-semibold text-[#1B4D2E] block mb-1">Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••" className="input-field" required />
+            <div className="relative">
+  <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+    placeholder="••••••••" className="input-field pr-12" required />
+  <button type="button" onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1B4D2E] text-xl">
+    {showPassword ? '🙈' : '👁️'}
+  </button>
+</div>
           </div>
           <div className="text-right">
             <Link href="/auth/forgot-password" className="text-sm text-[#1B4D2E] hover:underline">Forgot password?</Link>
