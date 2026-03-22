@@ -1,8 +1,7 @@
 'use client'
-export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import toast from 'react-hot-toast'
 
@@ -12,7 +11,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { signIn } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -22,7 +20,7 @@ export default function LoginPage() {
     setLoading(false)
     if (error) { toast.error('Incorrect email or password'); return }
     toast.success('Welcome back! 🌿')
-    router.push(searchParams.get('redirect') || '/dashboard')
+    router.push('/dashboard')
   }
 
   return (
