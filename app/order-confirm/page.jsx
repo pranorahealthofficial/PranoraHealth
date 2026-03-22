@@ -1,22 +1,21 @@
 'use client'
-export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default function OrderConfirmPage() {
   const [order, setOrder] = useState(null)
-  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
-    const id = searchParams.get('id')
+    const id = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('id')
+      : null
     if (id) {
       supabase.from('orders').select('*, order_items(*)').eq('id', id).single()
         .then(({ data }) => setOrder(data))
     }
-  }, [searchParams])
+  }, [])
 
   return (
     <div className="max-w-lg mx-auto px-5 py-20 text-center">
