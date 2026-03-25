@@ -13,7 +13,7 @@ export default function Footer() {
             <p className="text-sm text-white/60 leading-relaxed max-w-[220px]">Natural wellness inspired by Ayurveda & modern health science.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <a href="https://youtube.com/@pranorahealthofficial" target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[#C9A84C] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-all">YouTube</a>
-              <span className="text-[11px] font-bold text-[#C9A84C] bg-white/10 px-3 py-1 rounded-full">Instagram</span>
+              <a href="https://instagram.com/pranorahealthofficial" target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[#C9A84C] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-all">Instagram</a>
             </div>
           </div>
           <div>
