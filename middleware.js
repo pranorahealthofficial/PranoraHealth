@@ -35,9 +35,16 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
+  if (path.startsWith('/admin') && user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+  }
+
   return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/checkout/:path*', '/admin/:path*'],
+  matcher: ['/dashboard', '/dashboard/:path*', '/checkout', '/checkout/:path*', '/admin', '/admin/:path*'],
 }

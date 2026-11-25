@@ -5,7 +5,7 @@ import AddToCartBtn from '@/components/AddToCartBtn'
 
 export default async function ProductPage({ params }) {
   const supabase = createServerSupabaseClient()
-  const { data: product } = await supabase.from('products').select('*, product_reviews(*)').eq('slug', params.slug).single()
+  const { data: product } = await supabase.from('products').select('*, product_reviews(*)').eq('slug', params.slug).eq('is_active', true).single()
   if (!product) notFound()
 
   const discount = Math.round((1 - product.price / product.original_price) * 100)

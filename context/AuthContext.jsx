@@ -53,8 +53,11 @@ export function AuthProvider({ children }) {
 
   async function updateProfile(updates) {
     if (!user) return
-    const { error } = await supabase.from('profiles').update(updates).eq('id', user.id)
-    if (!error) setProfile(prev => ({ ...prev, ...updates }))
+    const allowed = {}
+    if (updates.full_name !== undefined) allowed.full_name = updates.full_name
+    if (updates.phone !== undefined) allowed.phone = updates.phone
+    const { error } = await supabase.from('profiles').update(allowed).eq('id', user.id)
+    if (!error) setProfile(prev => ({ ...prev, ...allowed }))
     return { error }
   }
 
