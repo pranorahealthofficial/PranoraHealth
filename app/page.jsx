@@ -43,7 +43,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="hidden md:grid grid-cols-2 gap-3">
-            {[['🌿','Ayurveda Inspired','3000+ years of wisdom'],['🏃','Daily Practice','Simple actionable habits'],['🍃','Natural','No artificial additives'],['❤️','Proven Results','Science-backed approach']].map(([icon, t, s]) => (
+            {[['🌿','Ayurveda Inspired','Rooted in Ayurveda'],['🏃','Daily Practice','Simple actionable habits'],['🍃','Natural','No artificial additives'],['❤️','Practical Results','Simple, practical habits']].map(([icon, t, s]) => (
               <div key={t} className="bg-white/10 rounded-2xl p-5 border border-white/10 hover:bg-white/15 transition-all">
                 <div className="text-3xl mb-2">{icon}</div>
                 <div className="text-white font-bold text-sm mb-1">{t}</div>
@@ -131,7 +131,7 @@ export default async function HomePage() {
           <div className="text-6xl mb-4">🧑‍⚕️</div>
           <h2 className="section-title mb-4">Our Mission</h2>
           <p className="text-base leading-relaxed text-gray-600 max-w-2xl mx-auto mb-6 italic">
-            "Pranora Health was born from a simple belief — <strong>good health should be accessible to everyone</strong>. We combine 3,000 years of Ayurvedic wisdom with modern wellness science to give you practical, natural solutions that actually work in your daily life."
+            "Pranora Health was born from a simple belief — <strong>good health should be accessible to everyone</strong>. We draw on Ayurvedic tradition and modern wellness science to share practical, natural habits for daily life."
           </p>
           <div className="inline-block bg-[#e8f2eb] rounded-xl px-6 py-3">
             <div className="font-bold text-[#1B4D2E]">Nishant Kewat</div>
