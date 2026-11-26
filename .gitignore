@@ -9,6 +9,7 @@
 /build
 
 # env files — KABHI GITHUB PE PUSH MAT KARO
+.env
 .env.local
 .env*.local
 
