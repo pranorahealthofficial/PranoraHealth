@@ -17,36 +17,45 @@ const CATEGORY_MAP = {
   'daily habits': 'Daily Health Habits',
 }
 
+// Single resolution point for the ?category= param: a name that already
+// matches a filter button is used as-is, a mapped topic name resolves to
+// its filter value, and unknown or missing values fall back to 'All'.
+// Button state and the database query both use this resolved value.
+function resolveCategory(param) {
+  if (!param) return 'All'
+  const key = param.trim().toLowerCase()
+  const exact = CATEGORIES.find(c => c.toLowerCase() === key)
+  return exact || CATEGORY_MAP[key] || 'All'
+}
+
 function BlogContent() {
   const searchParams = useSearchParams()
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('All')
+  const [category, setCategory] = useState(() => resolveCategory(searchParams.get('category')))
   const supabase = createClient()
 
-  // Apply ?category= from topic links (homepage/footer) as the filter.
-  // A name that already matches a filter button is used as-is; unknown
-  // or missing values fall back to 'All'.
+  // Apply ?category= from topic links (homepage/footer) as the filter,
+  // using the same resolved value the query uses.
   useEffect(() => {
-    const param = searchParams.get('category')
-    if (!param) { setCategory('All'); return }
-    const key = param.trim().toLowerCase()
-    const exact = CATEGORIES.find(c => c.toLowerCase() === key)
-    setCategory(exact || CATEGORY_MAP[key] || 'All')
+    setCategory(resolveCategory(searchParams.get('category')))
   }, [searchParams])
 
   useEffect(() => {
+    let cancelled = false
     async function fetchArticles() {
       setLoading(true)
       let query = supabase.from('articles').select('*').eq('is_published', true).order('created_at', { ascending: false })
       if (category !== 'All') query = query.eq('category', category)
       if (search) query = query.ilike('title', `%${search}%`)
       const { data } = await query
+      if (cancelled) return
       setArticles(data || [])
       setLoading(false)
     }
     fetchArticles()
+    return () => { cancelled = true }
   }, [category, search])
 
   return (
