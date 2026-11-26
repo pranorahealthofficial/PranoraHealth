@@ -38,16 +38,20 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/auth/login?redirect=/admin', request.url))
   }
 
-  if (path.startsWith('/admin') && user) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') {
+  if (user) {
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('role, is_blocked').eq('id', user.id).single()
+    // Fail-open: a transient profile-query error must not lock a user out.
+    // The admin page still enforces the admin check client-side.
+    if (!profileError && profile?.is_blocked) {
+      return NextResponse.redirect(new URL('/auth/login?error=blocked', request.url))
+    }
+    if (!profileError && path.startsWith('/admin') && profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
   return supabaseResponse
 }
-
 export const config = {
   matcher: ['/dashboard', '/dashboard/:path*', '/checkout', '/checkout/:path*', '/admin', '/admin/:path*'],
 }

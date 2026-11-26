@@ -1,19 +1,47 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import TurnstileWidget from '@/components/TurnstileWidget'
 import toast from 'react-hot-toast'
+
+const TURNSTILE_ENABLED = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name:'', email:'', subject:'', message:'' })
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [widgetKey, setWidgetKey] = useState(0)
   const supabase = createClient()
   const set = (k,v) => setForm(p=>({...p,[k]:v}))
+
+  async function verifyTurnstile() {
+    if (!TURNSTILE_ENABLED) return true
+    if (!turnstileToken) return false
+    try {
+      const res = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken }),
+      })
+      const data = await res.json().catch(() => ({}))
+      return data?.ok === true || data?.reason === 'not_configured'
+    } catch {
+      return false
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.name || !form.email || !form.message) {
       toast.error('Please fill all required fields'); return
+    }
+    const captchaOk = await verifyTurnstile()
+    if (!captchaOk) {
+      setTurnstileToken('')
+      setWidgetKey((k) => k + 1)
+      toast.error('Something went wrong. Try again.')
+      return
     }
     setLoading(true)
     const { error } = await supabase.from('contacts').insert(form)
@@ -62,6 +90,9 @@ export default function ContactPage() {
                 <textarea value={form.message} onChange={e=>set('message',e.target.value)}
                   placeholder="Your message here..." className="input-field" rows={4} required />
               </div>
+              {TURNSTILE_ENABLED && (
+                <TurnstileWidget key={widgetKey} onVerify={setTurnstileToken} />
+              )}
               <button type="submit" disabled={loading} className="btn-primary w-full">
                 {loading ? 'Sending...' : 'Send Message ✉️'}
               </button>
