@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { recordSecurityEvent } from './lib/security-events'
 
 export async function middleware(request) {
   let supabaseResponse = NextResponse.next({ request })
@@ -43,6 +44,8 @@ export async function middleware(request) {
     // Fail-open: a transient profile-query error must not lock a user out.
     // The admin page still enforces the admin check client-side.
     if (!profileError && profile?.is_blocked) {
+      // Security event (fail-open, skipped when the events table is absent).
+      await recordSecurityEvent(supabase, 'blocked_attempt', 'blocked account reached a protected page', user.id, user.id)
       return NextResponse.redirect(new URL('/auth/login?error=blocked', request.url))
     }
     if (!profileError && path.startsWith('/admin') && profile?.role !== 'admin') {

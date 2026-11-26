@@ -8,7 +8,6 @@ import TurnstileWidget from '@/components/TurnstileWidget'
 import toast from 'react-hot-toast'
 
 const TURNSTILE_ENABLED = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,7 +54,20 @@ export default function LoginPage() {
       return
     }
     const { data, error } = await signIn(email, password)
-    if (error) { setLoading(false); toast.error('Incorrect email or password'); return }
+    if (error) {
+      setLoading(false)
+      // Security event, fire-and-forget: report the failed login for the
+      // alerts view. Sends no email, password, or token — only the event
+      // type. Never delays or changes the login error shown. Covers
+      // guessing through this form only; direct Auth API calls bypass it.
+      fetch('/api/security-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_type: 'failed_login' }),
+      }).catch(() => {})
+      toast.error('Incorrect email or password')
+      return
+    }
     const userId = data?.user?.id
     if (userId) {
       const supabase = createClient()

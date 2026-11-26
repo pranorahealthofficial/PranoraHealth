@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getClientIp, isRateLimited } from '@/lib/rate-limit'
+import { recordSecurityEvent } from '@/lib/security-events'
 
 const PAYMENT_METHODS = ['cod', 'whatsapp', 'upi']
 const MAX_QUANTITY_PER_ITEM = 20
@@ -30,6 +31,8 @@ export async function POST(request) {
     .eq('id', user.id)
     .single()
   if (!profileError && profile?.is_blocked) {
+    // Security event (fail-open, skipped when the events table is absent).
+    await recordSecurityEvent(supabase, 'blocked_attempt', 'blocked account tried to place an order', user.id, user.id)
     return NextResponse.json({ error: 'Your account is blocked. To appeal, contact us.' }, { status: 403 })
   }
 
