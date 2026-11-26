@@ -119,9 +119,6 @@ export default function LoginPage() {
           Don&apos;t have an account?{' '}
           <Link href="/auth/register" className="font-bold text-[#1B4D2E] hover:underline">Register</Link>
         </p>
-        <div className="border-t border-gray-100 mt-5 pt-4 text-center">
-          <Link href="/admin" className="text-xs text-gray-400 hover:text-gray-600">Admin Panel →</Link>
-        </div>
       </div>
     </div>
   )
