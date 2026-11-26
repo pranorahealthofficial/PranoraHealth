@@ -31,6 +31,14 @@ export default function ResetPasswordPage() {
     router.push('/auth/login')
   }
 
+  if (hasSession === null) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-4xl animate-spin">🌿</div>
+      </div>
+    )
+  }
+
   if (hasSession === false) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-5">
