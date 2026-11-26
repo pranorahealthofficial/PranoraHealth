@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server'
+import { getClientIp, isRateLimited } from '@/lib/rate-limit'
 
 // Verifies a Cloudflare Turnstile token server-side. The secret is never
 // returned or logged, and the token is never logged. When no secret is
 // configured, verification is inactive and callers proceed as today.
+//
+// Rate limit: 30 requests per IP per 10 minutes. The limiter fails open,
+// so a limiter error never blocks a legitimate verification.
+const VERIFY_LIMIT = 30
+const VERIFY_WINDOW_MS = 10 * 60 * 1000
+
 export async function POST(request) {
+  if (isRateLimited(`verify-turnstile:${getClientIp(request)}`, VERIFY_LIMIT, VERIFY_WINDOW_MS)) {
+    return NextResponse.json({ ok: false, error: 'Too many attempts. Please try again later.' }, { status: 429, headers: { 'Retry-After': '600' } })
+  }
+
   let body
   try {
     body = await request.json()

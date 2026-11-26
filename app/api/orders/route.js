@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { getClientIp, isRateLimited } from '@/lib/rate-limit'
 
 const PAYMENT_METHODS = ['cod', 'whatsapp', 'upi']
 const MAX_QUANTITY_PER_ITEM = 20
 const MAX_DISTINCT_ITEMS = 20
 
+// Rate limit: 20 order attempts per IP per 10 minutes. The limiter fails
+// open, so a limiter error never blocks a legitimate order.
+const ORDER_LIMIT = 20
+const ORDER_WINDOW_MS = 10 * 60 * 1000
+
 export async function POST(request) {
+  if (isRateLimited(`orders:${getClientIp(request)}`, ORDER_LIMIT, ORDER_WINDOW_MS)) {
+    return NextResponse.json({ error: 'Too many orders. Please try again later.' }, { status: 429, headers: { 'Retry-After': '600' } })
+  }
+
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
