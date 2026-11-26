@@ -21,7 +21,8 @@ export default function LoginPage() {
     setLoading(false)
     if (error) { toast.error('Incorrect email or password'); return }
     toast.success('Welcome back! 🌿')
-    router.push('/dashboard')
+    const redirect = new URLSearchParams(window.location.search).get('redirect')
+    router.push(redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard')
   }
 
   return (
