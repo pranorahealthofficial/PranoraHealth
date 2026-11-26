@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const PAYMENT_METHODS = ['cod', 'whatsapp', 'upi']
+const MAX_QUANTITY_PER_ITEM = 20
+const MAX_DISTINCT_ITEMS = 20
 
 export async function POST(request) {
   const supabase = createServerSupabaseClient()
@@ -42,8 +44,11 @@ export async function POST(request) {
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: 'Your cart is empty.' }, { status: 400 })
   }
+  if (items.length > MAX_DISTINCT_ITEMS) {
+    return NextResponse.json({ error: 'Invalid cart item.' }, { status: 400 })
+  }
   for (const item of items) {
-    if (!item?.product_id || !Number.isInteger(item.quantity) || item.quantity < 1) {
+    if (!item?.product_id || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > MAX_QUANTITY_PER_ITEM) {
       return NextResponse.json({ error: 'Invalid cart item.' }, { status: 400 })
     }
   }
