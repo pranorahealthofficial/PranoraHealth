@@ -9,15 +9,6 @@ export const metadata = {
   title: 'Pranora Health – Natural Wellness',
   description: 'Natural health inspired by Ayurveda & modern science. Practical wellness knowledge and natural products for a better life.',
   keywords: 'ayurveda, natural health, gut health, immunity, hair care, skin health, pranora health',
-  metadataBase: new URL('https://pranora-health-quv2.vercel.app'),
-  openGraph: {
-    title: 'Pranora Health – Natural Wellness',
-    description: 'Natural health inspired by Ayurveda & modern science. Practical wellness knowledge and natural products for a better life.',
-    url: 'https://pranora-health-quv2.vercel.app',
-    siteName: 'Pranora Health',
-    type: 'website',
-    locale: 'en',
-  },
 }
 
 export default function RootLayout({ children }) {
