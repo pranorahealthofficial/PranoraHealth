@@ -60,7 +60,7 @@ export default function NewsletterForm() {
   return (
     <form onSubmit={handleSubscribe} className="flex gap-2 flex-wrap">
       <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-        placeholder="your@email.com" className="input-field flex-1" required />
+        placeholder="your@email.com" className="input-field flex-1 min-w-[240px]" required />
       {TURNSTILE_ENABLED && (
         <TurnstileWidget key={widgetKey} onVerify={setTurnstileToken} />
       )}
