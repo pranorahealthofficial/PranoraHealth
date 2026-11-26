@@ -10,6 +10,17 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Please log in to place an order.' }, { status: 401 })
   }
 
+  // Blocked users cannot place orders. Fail-open: if the profile query
+  // itself errors, the order flow continues as before.
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('is_blocked')
+    .eq('id', user.id)
+    .single()
+  if (!profileError && profile?.is_blocked) {
+    return NextResponse.json({ error: 'Your account is blocked. To appeal, contact us.' }, { status: 403 })
+  }
+
   let body
   try {
     body = await request.json()
