@@ -1,16 +1,40 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ArticleCard from '@/components/ArticleCard'
 
 const CATEGORIES = ['All', 'Gut Health', 'Ayurveda', 'Immunity', 'Skin and Hair Care', 'Daily Health Habits', 'Natural Remedies']
 
-export default function BlogPage() {
+// Topic names used by the homepage and footer links (?category=<name>),
+// mapped to the real filter values this page queries the database with.
+const CATEGORY_MAP = {
+  'gut health': 'Gut Health',
+  'digestion': 'Gut Health',
+  'immunity': 'Immunity',
+  'skin health': 'Skin and Hair Care',
+  'hair health': 'Skin and Hair Care',
+  'daily habits': 'Daily Health Habits',
+}
+
+function BlogContent() {
+  const searchParams = useSearchParams()
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const supabase = createClient()
+
+  // Apply ?category= from topic links (homepage/footer) as the filter.
+  // A name that already matches a filter button is used as-is; unknown
+  // or missing values fall back to 'All'.
+  useEffect(() => {
+    const param = searchParams.get('category')
+    if (!param) { setCategory('All'); return }
+    const key = param.trim().toLowerCase()
+    const exact = CATEGORIES.find(c => c.toLowerCase() === key)
+    setCategory(exact || CATEGORY_MAP[key] || 'All')
+  }, [searchParams])
 
   useEffect(() => {
     async function fetchArticles() {
@@ -62,5 +86,13 @@ export default function BlogPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense>
+      <BlogContent />
+    </Suspense>
   )
 }
