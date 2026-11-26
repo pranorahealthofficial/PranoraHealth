@@ -5,14 +5,17 @@ import SaveArticleBtn from '@/components/SaveArticleBtn'
 
 export default async function ArticlePage({ params }) {
   const supabase = createServerSupabaseClient()
-  const { data: article } = await supabase.from('articles').select('*').eq('slug', params.slug).single()
+  const { data: article } = await supabase.from('articles').select('*').eq('slug', params.slug).eq('is_published', true).single()
   if (!article) notFound()
 
-  const { data: related } = await supabase.from('articles').select('*').eq('category', article.category).neq('id', article.id).limit(3)
+  const { data: related } = await supabase.from('articles').select('*').eq('category', article.category).neq('id', article.id).eq('is_published', true).limit(3)
+
+  const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
   const contentHtml = (article.content || '').split('\n\n').map(p => {
-    if (p.startsWith('## ')) return `<h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#1B4D2E;margin:28px 0 12px">${p.replace('## ','')}</h2>`
-    return `<p style="font-size:16px;line-height:1.9;color:#444;margin-bottom:16px">${p.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g,'<br>')}</p>`
+    const safe = escapeHtml(p)
+    if (safe.startsWith('## ')) return `<h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#1B4D2E;margin:28px 0 12px">${safe.replace('## ','')}</h2>`
+    return `<p style="font-size:16px;line-height:1.9;color:#444;margin-bottom:16px">${safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g,'<br>')}</p>`
   }).join('')
 
   return (

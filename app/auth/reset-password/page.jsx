@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -10,8 +11,13 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [hasSession, setHasSession] = useState(null)
   const supabase = createClient()
   const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setHasSession(!!session))
+  }, [])
 
   async function handleReset(e) {
     e.preventDefault()
@@ -23,6 +29,19 @@ export default function ResetPasswordPage() {
     if (error) { toast.error(error.message); return }
     toast.success('Password updated! Please login. 🌿')
     router.push('/auth/login')
+  }
+
+  if (hasSession === false) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-5">
+        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
+          <div className="text-4xl mb-2">🔑</div>
+          <h1 className="font-serif text-2xl font-bold text-[#1B4D2E]">Link expired</h1>
+          <p className="text-gray-500 text-sm mt-1 mb-4">This password reset link has expired or is invalid. Please request a new one.</p>
+          <Link href="/auth/forgot-password" className="btn-primary">Request a New Link</Link>
+        </div>
+      </div>
+    )
   }
 
   return (

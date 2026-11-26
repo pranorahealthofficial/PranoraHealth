@@ -12,8 +12,11 @@ export default function OrderConfirmPage() {
       ? new URLSearchParams(window.location.search).get('id')
       : null
     if (id) {
-      supabase.from('orders').select('*, order_items(*)').eq('id', id).single()
-        .then(({ data }) => setOrder(data))
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) return
+        supabase.from('orders').select('*, order_items(*)').eq('id', id).eq('user_id', user.id).single()
+          .then(({ data }) => setOrder(data))
+      })
     }
   }, [])
 

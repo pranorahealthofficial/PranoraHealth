@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
-import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -10,7 +9,6 @@ export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart()
   const { user, profile } = useAuth()
   const router = useRouter()
-  const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [payment, setPayment] = useState('cod')
   const [form, setForm] = useState({
@@ -32,24 +30,25 @@ export default function CheckoutPage() {
     if (cart.length === 0) { toast.error('Your cart is empty'); return }
 
     setLoading(true)
-    const { data: order, error } = await supabase.from('orders').insert({
-      user_id: user.id, user_name: name, user_email: user.email,
-      phone, address, city, state, pincode,
-      payment_method: payment, order_status: 'confirmed',
-      subtotal: cartTotal, delivery_charge: delivery, total
-    }).select().single()
-
-    if (error) { toast.error('Order failed. Please try again.'); setLoading(false); return }
-
-    const items = cart.map(i => ({
-      order_id: order.id, product_id: i.id,
-      product_name: i.name, product_icon: i.icon,
-      price: i.price, quantity: i.qty, subtotal: i.price * i.qty
-    }))
-    await supabase.from('order_items').insert(items)
-    clearCart()
-    setLoading(false)
-    router.push(`/order-confirm?id=${order.id}`)
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.map(i => ({ product_id: i.id, quantity: i.qty })),
+          name, phone, address, city, state, pincode,
+          payment_method: payment,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data?.error || 'Order failed. Please try again.'); setLoading(false); return }
+      clearCart()
+      setLoading(false)
+      router.push(`/order-confirm?id=${data.id}`)
+    } catch {
+      toast.error('Order failed. Please try again.')
+      setLoading(false)
+    }
   }
 
   return (
