@@ -35,7 +35,7 @@ export default function Footer() {
               <a href="https://wa.me/917489262622" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C9A84C]">💬 WhatsApp Order</a>
               <a href="https://youtube.com/@pranorahealthofficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C9A84C]">📺 @pranorahealthofficial</a>
             </div>
-            <div className="mt-3 text-[11px] text-white/40">📍 India · #pranorahealth · #prenorahealth</div>
+            <div className="mt-3 text-[11px] text-white/40">📍 India · #pranorahealth</div>
           </div>
         </div>
         <div className="border-t border-white/10 pt-5 flex flex-col md:flex-row justify-between gap-2 text-xs text-white/40">
