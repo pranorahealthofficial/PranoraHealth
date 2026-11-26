@@ -41,17 +41,9 @@ export default async function HomePage() {
               <Link href="/blog" className="btn-gold">Explore Health Guides</Link>
               <Link href="/products" className="btn-outline-white">Discover Products</Link>
             </div>
-            <div className="flex gap-7 mt-8">
-              {[['10K+', 'Happy Users'], ['50+', 'Health Guides'], ['5★', 'Rated Products']].map(([n, l]) => (
-                <div key={l}>
-                  <div className="font-serif text-3xl font-bold text-[#C9A84C]">{n}</div>
-                  <div className="text-xs text-white/55">{l}</div>
-                </div>
-              ))}
-            </div>
           </div>
           <div className="hidden md:grid grid-cols-2 gap-3">
-            {[['🌿','Ayurveda Inspired','3000+ years of wisdom'],['🏃','Daily Practice','Simple actionable habits'],['🍃','100% Natural','No artificial additives'],['❤️','Proven Results','Science-backed approach']].map(([icon, t, s]) => (
+            {[['🌿','Ayurveda Inspired','3000+ years of wisdom'],['🏃','Daily Practice','Simple actionable habits'],['🍃','Natural','No artificial additives'],['❤️','Proven Results','Science-backed approach']].map(([icon, t, s]) => (
               <div key={t} className="bg-white/10 rounded-2xl p-5 border border-white/10 hover:bg-white/15 transition-all">
                 <div className="text-3xl mb-2">{icon}</div>
                 <div className="text-white font-bold text-sm mb-1">{t}</div>
@@ -152,7 +144,7 @@ export default async function HomePage() {
         <div className="max-w-lg mx-auto text-center">
           <div className="text-5xl mb-3">📬</div>
           <h2 className="section-title text-2xl mb-2">Get Weekly Health Tips</h2>
-          <p className="text-gray-500 mb-6">Join 10,000+ Indians receiving Ayurvedic wellness tips every week.</p>
+          <p className="text-gray-500 mb-6">Receive Ayurvedic wellness tips every week.</p>
           <NewsletterForm />
         </div>
       </section>
