@@ -1,9 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/context/AuthContext'
-import { createClient } from '@/lib/supabase'
 import TurnstileWidget from '@/components/TurnstileWidget'
 import toast from 'react-hot-toast'
 
@@ -13,10 +10,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, signOut } = useAuth()
-  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isBlocked, setIsBlocked] = useState(false)
+  const [isLocked, setIsLocked] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const [widgetKey, setWidgetKey] = useState(0)
 
@@ -54,25 +50,51 @@ export default function LoginPage() {
       toast.error('Incorrect email or password')
       return
     }
-    const { data, error } = await signIn(email, password)
-    if (error) { setLoading(false); toast.error('Incorrect email or password'); return }
-    const userId = data?.user?.id
-    if (userId) {
-      const supabase = createClient()
-      const { data: profile, error: profileError } = await supabase.from('profiles').select('is_blocked').eq('id', userId).single()
-      // Fail-open: if the profile query itself errors, allow the login as today.
-      if (!profileError && profile?.is_blocked) {
-        await signOut()
-        setLoading(false)
-        setIsBlocked(true)
-        toast.error('Your account is blocked. To appeal, contact us.')
-        return
-      }
+    // The password is verified server-side (/api/auth/login), which also
+    // enforces the per-email lockout: 5 failed attempts lock the email
+    // for 5 hours. A locked account gets status 423 and the lock banner
+    // below; wrong passwords still get the generic error as before.
+    let res
+    try {
+      res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+    } catch {
+      setLoading(false)
+      toast.error('Incorrect email or password')
+      return
+    }
+    const data = await res.json().catch(() => ({}))
+    if (res.status === 423 && data?.error === 'locked') {
+      setLoading(false)
+      setIsLocked(true)
+      setTurnstileToken('')
+      setWidgetKey((k) => k + 1)
+      return
+    }
+    if (res.status === 403 && data?.error === 'blocked') {
+      setLoading(false)
+      setIsBlocked(true)
+      toast.error('Your account is blocked. To appeal, contact us.')
+      return
+    }
+    if (!res.ok) {
+      setLoading(false)
+      setIsLocked(false)
+      setTurnstileToken('')
+      setWidgetKey((k) => k + 1)
+      toast.error(res.status === 429 ? 'Too many attempts. Please try again later.' : 'Incorrect email or password')
+      return
     }
     setLoading(false)
     toast.success('Welcome back! 🌿')
     const redirect = new URLSearchParams(window.location.search).get('redirect')
-    router.push(redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard')
+    // Full reload (not router.push): the session cookies were set by the
+    // server login route, and a reload makes the auth state pick up the
+    // new session before landing on the destination page.
+    window.location.assign(redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard')
   }
 
   return (
@@ -86,6 +108,14 @@ export default function LoginPage() {
         {isBlocked && (
           <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
             Your account is blocked. To appeal, <Link href="/contact" className="font-bold underline">contact us</Link>.
+          </div>
+        )}
+        {isLocked && (
+          <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+            Too many failed login attempts. This email is locked for 5 hours.
+            Forgot your password?{' '}
+            <Link href="/auth/forgot-password" className="font-bold underline">Reset your password</Link>
+            {' '}to unlock it right away.
           </div>
         )}
         <form onSubmit={handleLogin} className="space-y-4">

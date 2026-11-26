@@ -27,6 +27,10 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password })
     setLoading(false)
     if (error) { toast.error(error.message); return }
+    // A successful password reset clears any login lockout for this
+    // email. Best-effort: the password was changed either way; if this
+    // call fails the lock simply expires on its own.
+    try { await fetch('/api/auth/clear-lockout', { method: 'POST' }) } catch {}
     toast.success('Password updated! Please login. 🌿')
     router.push('/auth/login')
   }
